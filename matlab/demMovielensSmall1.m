@@ -18,11 +18,11 @@ for partition = 1:5
   options = collabOptimiseOptions;
   capName = dataSetName;
   capName(1) = upper(capName(1));
+  options.saveName = ['dem' capName num2str(experimentNo) '_'];
   options.momentum = 0.9;
   options.learnRate = 0.0001;
   options.paramMomentum = 0.9;
   options.paramLearnRate = 0.0001;
-  options.saveName = ['dem' capName num2str(experimentNo) '_'];
 
   model = collabOptimise(model, Y, options)
   
