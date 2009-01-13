@@ -57,26 +57,28 @@ function model = collabOptimise(model, Y, options)
         continue
       end
       runIter = runIter + 1;
-      if options.optimiseParam
-        if iscell(Y)
-          [g, g_param] = collabLogLikeGradients(model, Y(order(user), :));
-        else
-          [g, g_param] = collabLogLikeGradients(model, Y(:, order(user)));
-        end
-        
-        model.changeParam = model.changeParam * options.paramMomentum + options.paramLearnRate*g_param;
-        param = param + model.changeParam;
-      
-        model.kern = kernExpandParam(model.kern, param);
-      else
-        if iscell(Y)
-          g = collabLogLikeGradients(model, Y(order(user), :));
-        else
-          g = collabLogLikeGradients(model, Y(:, order(user)));
-        end
+      if (iscell(Y)) ||   (nnz(Y(:,order(user))))
+          if options.optimiseParam
+            if iscell(Y)
+                [g, g_param] = collabLogLikeGradients(model, Y(order(user), :));
+            else
+                [g, g_param] = collabLogLikeGradients(model, Y(:, order(user)));
+            end
+
+            model.changeParam = model.changeParam * options.paramMomentum + options.paramLearnRate*g_param;
+            param = param + model.changeParam;
+
+            model.kern = kernExpandParam(model.kern, param);
+          else
+            if iscell(Y)
+                    g = collabLogLikeGradients(model, Y(order(user), :));
+            else 
+                g = collabLogLikeGradients(model, Y(:, order(user)));
+            end
+          end
+          model.change = model.change *options.momentum+options.learnRate*g;
+          model.X = model.X + model.change;
       end
-      model.change = model.change *options.momentum+options.learnRate*g;
-      model.X = model.X + model.change;
       if ~rem(runIter, options.saveEvery)
         try
           save([options.saveName num2str(currIters)], 'model', 'iters', ...
