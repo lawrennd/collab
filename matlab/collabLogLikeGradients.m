@@ -33,35 +33,51 @@ function [g, g_param] = collabLogLikeGradients(model, y)
     ind = fullInd(span(block-1)+1:span(block));
     
     if iscell(y)
-      yprime = (double(y{1, 2}(span(block-1)+1:span(block)))-model.mu(ind))./model.sd(ind);
+      yuse = double(y{1, 2}(span(block-1)+1:span(block)));
     else
-      yprime = (y(ind, 1)-model.mu(ind))./model.sd(ind);
+      yuse = y(ind, 1);
     end
-    
-    N = length(ind);
     X = model.X(ind, :);
-    K = kernCompute(model.kern, X);
-    invK = pdinv(K);
-    invKy = invK*yprime;
-    gK = -invK + invKy*invKy';
-    
-    %%% Prepare to Compute Gradients with respect to X %%%
-    gKX = kernGradX(model.kern, X, X);
-    gKX = gKX*2;
-    dgKX = kernDiagGradX(model.kern, X);
-    for i = 1:length(ind)
-      gKX(i, :, i) = dgKX(i, :);
-    end
-    gX = zeros(N, model.q);
-    
-    counter = 0;
-    for i = 1:N
-      counter = counter + 1;
-      for j = 1:model.q
-        gX(i, j) = gX(i, j) + gKX(:, j, i)'*gK(:, counter);
+    N = length(ind);
+    if ~isfield(model, 'noise') || isempty(model.noise)
+      yprime = (yuse-model.mu(ind))./model.sd(ind);
+      K = kernCompute(model.kern, X);
+      invK = pdinv(K);
+      invKy = invK*yprime;
+      gK = -invK + invKy*invKy';
+      
+      %%% Prepare to Compute Gradients with respect to X %%%
+      gKX = kernGradX(model.kern, X, X);
+      gKX = gKX*2;
+      dgKX = kernDiagGradX(model.kern, X);
+      for i = 1:length(ind)
+        gKX(i, :, i) = dgKX(i, :);
       end
+      gX = zeros(N, model.q);
+      
+      counter = 0;
+      for i = 1:N
+        counter = counter + 1;
+        for j = 1:model.q
+          gX(i, j) = gX(i, j) + gKX(:, j, i)'*gK(:, counter);
+        end
+      end
+      g(ind, :) = gX;
+      g_param = g_param + kernGradient(model.kern, X, gK);
+    else
+      yuse = yuse-1; % make yuse start from zero.
+      % Create an IVM model and update site parameters.
+      options = ivmOptions;
+      options.kern = model.kern;
+      options.noise = model.noise;
+      options.selectionCriterion = model.selectionCriterion;
+      options.numActive = min(model.numActive, N);
+      imodel = ivmCreate(model.q, 1, X, yuse, options);
+      imodel = ivmOptimiseIVM(imodel, options.display);
+      gX = gplvmApproxLogLikeActiveSetGrad(imodel);
+      gX = reshape(gX, length(imodel.I), size(imodel.X, 2));
+      g(ind(imodel.I), :) = gX;
+      g_param = g_param + ivmApproxLogLikeKernGrad(imodel);
     end
-    g(ind, :) = gX;
-    g_param = g_param + kernGradient(model.kern, X, gK);
   end
 end

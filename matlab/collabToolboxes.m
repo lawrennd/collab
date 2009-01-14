@@ -6,3 +6,6 @@ importTool('mltools');
 importLatest('optimi');
 importTool('datasets');
 importLatest('kern');
+importLatest('ivm');
+importLatest('gplvm');
+importLatest('noise');

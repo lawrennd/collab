@@ -9,7 +9,7 @@ function ll = collabLogLikelihood(model, y)
 %
 % SEEALSO : collabCreate, collabLogLikeGradients, modelLogLikelihood
 %
-% COPYRIGHT : Neil D. Lawrence, 2005, 2006
+% COPYRIGHT : Neil D. Lawrence, 2009
 
 % COLLAB
 
