@@ -17,7 +17,7 @@ import math
 
 np.random.seed(seed=10000)
 
-q = 2
+q = 5
 lambdaVal = 0.01
 maxLearnRate = 1
 t0 = 400000
@@ -34,7 +34,7 @@ saveEvery = 20000
 numIters = 10
 
 dataSetName = "netflix"
-experimentNo = 2
+experimentNo = 5
 
 
 # load in data.
@@ -258,7 +258,6 @@ for iter in range(numIters):
             remainTime = remainUserIters/usersPerSecond
             tic = toc
             print("Remain time (hrs): " + str(remainTime/3600))
-            sys.stdout.flush()
 
         # Check if it's time to save
         if not np.remainder(count, saveEvery):
@@ -284,7 +283,6 @@ for iter in range(numIters):
             Xchange.tofile(os.path.join(saveDir, "Xchange" ))
             paramChange.tofile(os.path.join(saveDir, "paramChange" ))
             inducingChange.tofile(os.path.join(iterDir, "inducingChange" ))
-            sys.stdout.flush()
 
 
 
