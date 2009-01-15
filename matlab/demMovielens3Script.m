@@ -85,8 +85,8 @@ options.saveName = ['dem' capName num2str(experimentNo) '_'];
           % normalize the values
 	           
 
-mu = mu*model.sd(1);
-mu = mu+model.mu(1);
+          mu = mu*model.sd(1);
+          mu = mu+model.mu(1);
           a = Ytest(tind, i) - mu; 
           a = [a; Ytest(elim, i)];
           val_L2 = val_L2 + a'*a;
