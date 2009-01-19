@@ -14,12 +14,13 @@ import math
 
 class iterInfo:
     """A class containing information for the current iteration."""
-    def __init__(self, tic, tic0, count, numSparse, userOrder):
+    def __init__(self, tic, tic0, count, numSparse, userOrder, iterNum):
         self.tic = tic
         self.tic0 = tic0
         self.count = count
         self.numSparse = numSparse
         self.userOrder = userOrder
+        self.iterNum = iterNum
 
 class dataSet:
     """A class containing information about the data set."""
@@ -116,9 +117,6 @@ def extractKernType(latentDim, lnsigma2, options):
     fullKern = nl.cmpndKern(latentDim) 
     sparseKern = nl.cmpndKern(latentDim) 
     
-    print fullKern
-    print sparseKern
-
     kt = type(o.baseKern)
     if kt==str:
         if o.baseKern == 'rbf':
@@ -163,7 +161,149 @@ def extractKernType(latentDim, lnsigma2, options):
 
     return fullKern, sparseKern
 
-#def restart(latentDim, dataSetName, experimentNo, options):
+
+def loadResults(loadDir, latentDim, options):
+
+    X = np.fromfile(os.path.join(loadDir, "X")).reshape(latentDim, -1).transpose()
+    Xchange = np.fromfile(os.path.join(loadDir, "Xchange")).reshape(latentDim, -1).transpose()
+    X_u = np.fromfile(os.path.join(loadDir, "X_u")).reshape(latentDim, -1).transpose()
+    inducingChange = np.fromfile(os.path.join(loadDir, "inducingChange")).reshape(latentDim, -1).transpose()
+
+    betaSigma = np.fromfile(os.path.join(loadDir, "betaSigma")).reshape(1, 4)
+    lnsigma2 = betaSigma[0,1]
+    lnbeta = betaSigma[0,0]
+    lnsigma2Change = betaSigma[0,3]
+    lnbetaChange = betaSigma[0,2]
+
+    (fullKern, sparseKern) = extractKernType(latentDim, lnsigma2, options)
+    
+    numParams = fullKern.getNumParams()
+    param = np.fromfile(os.path.join(loadDir, "param")).reshape(1, numParams)
+    paramChange = np.fromfile(os.path.join(loadDir, "paramChange")).reshape(1, numParams)
+
+
+    # Set log sigma2 (variance for FTC) and log beta (precision for sparse)
+    # using this dummy y forces mean of Gaussian noise to be zero.
+    dummyy = nl.matrix(10, 1)
+    dummyy.zeros()
+
+    # paramIter.fromarray(param)
+    paramIter = nl.matrix(param.shape[0], param.shape[1])
+    param[0, -1] = lnsigma2
+#    paramIter.fromarray(param)
+    for i in range(param.shape[1]):
+        paramIter.setVal(param[0, i], i)
+    fullKern.setTransParams(paramIter)
+
+    paramIter = nl.matrix(param.shape[0], param.shape[1]-1)
+    param2 = param[0, 0:-1]
+#    paramIter.fromarray(param2)
+    for i in range(param.shape[1]-1):
+         paramIter.setVal(param[0, i], i)
+    sparseKern.setTransParams(paramIter)
+
+    # Set up parameters
+    p = params(X = X, 
+               X_u = X_u, 
+               param = param, 
+               fullKern = fullKern,
+               sparseKern = sparseKern,
+               lnsigma2 = lnsigma2, 
+               lnbeta = lnbeta, 
+               noise =  nl.gaussianNoise(dummyy))
+
+
+
+    # Set up vectors for storing old changes.
+    pc = params(X=Xchange, 
+                X_u=inducingChange,
+                param=paramChange, 
+                lnsigma2=lnsigma2Change, 
+                lnbeta=lnbetaChange)
+    return p, pc
+
+def restart(loadIter, startCount, loadUser, latentDim, dataSetName, experimentNo, options):
+    """Restart a collaborative filtering model from a crashed run."""
+
+    o = options
+    np.random.seed(seed=o.seed)
+
+    isNetflix = False
+    if dataSetName=="netflix":
+        isNetflix = True
+    
+    d = loadData(dataSetName)
+    
+    resultsDir = os.path.join(o.resultsBaseDir, dataSetName + str(experimentNo))
+    if not os.path.exists(resultsDir):
+        os.mkdir(resultsDir)
+    loadDir1 = "iter" + str(loadIter)
+    userOrder = np.fromfile(file=os.path.join(resultsDir, 
+                                              loadDir1, 
+                                              "userOrder"),
+                            dtype=int)
+
+    
+    loadDir2 = "count" + str(startCount) + "_user" + str(loadUser)
+
+    loadDir = os.path.join(resultsDir, loadDir1, loadDir2)
+
+    p, pc = loadResults(loadDir, latentDim, o)
+
+
+    numSparse = 0
+    print "Restarting from iteration ", loadIter, " count ", startCount, " ... "
+    tic = time.time()
+    tic0 = tic
+
+    for iter in range(loadIter, o.numIters):
+        
+        saveDir = "iter" + str(iter)
+        iterDir = os.path.join(resultsDir, saveDir)
+        if iter>loadIter:
+            # Ensure repeatability
+            state = np.random.get_state()
+            # Order users randomly
+            userOrder = np.random.permutation(d.data.userIDs())
+
+            if not os.path.exists(iterDir):
+                os.mkdir(iterDir)
+
+            userOrder.tofile(os.path.join(iterDir, "userOrder" ))
+            p.param.tofile(os.path.join(iterDir, "param" ))
+            p.X.tofile(os.path.join(iterDir, "X" ))
+            p.X_u.tofile(os.path.join(iterDir, "X_u" ))
+            pc.X.tofile(os.path.join(iterDir, "Xchange" ))
+            pc.param.tofile(os.path.join(iterDir, "paramChange" ))
+            pc.X_u.tofile(os.path.join(iterDir, "inducingChange" ))
+
+        info = iterInfo(tic = tic, 
+                        tic0 = tic0, 
+                        count = startCount, 
+                        numSparse = numSparse, 
+                        userOrder = userOrder,
+                        iterNum = iter)
+        runIter(dataSet = d, 
+                params = p, 
+                paramChange = pc, 
+                options = o,
+                iterInfo = info,
+                iterDir = iterDir)
+
+    # Save state for repeatability
+    saveDir = "final"
+    iterDir = os.path.join(resultsDir, saveDir)
+    if not os.path.exists(iterDir):
+        os.mkdir(iterDir)
+    betaSigma = np.array([p.lnbeta, p.lnsigma2, pc.lnbeta, pc.lnsigma2])
+    betaSigma.tofile(os.path.join(iterDir, "betaSigma"))
+    p.param.tofile(os.path.join(iterDir, "param" ))
+    p.X.tofile(os.path.join(iterDir, "X" ))
+    p.X_u.tofile(os.path.join(iterDir, "X_u" ))
+    pc.X.tofile(os.path.join(iterDir, "Xchange" ))
+    pc.param.tofile(os.path.join(iterDir, "paramChange" ))
+    pc.X_u.tofile(os.path.join(iterDir, "inducingChange" ))
+
     
 
 def run(latentDim, dataSetName, experimentNo, options):
@@ -191,8 +331,6 @@ def run(latentDim, dataSetName, experimentNo, options):
     dummyy.zeros()
 
     (fullKern, sparseKern) = extractKernType(latentDim, math.log(o.startVariance), o)
-    print fullKern
-    print sparseKern
     # Set up parameters
     p = params(X = np.random.normal(0.0, 1e-6, (d.numMovies, latentDim)), 
                X_u = np.random.normal(0.0, 1e-6, (o.numActive, latentDim)), 
@@ -247,18 +385,20 @@ def run(latentDim, dataSetName, experimentNo, options):
                         tic0 = tic0, 
                         count = count, 
                         numSparse = numSparse, 
-                        userOrder = userOrder)
+                        userOrder = userOrder,
+                        iterNum = iter)
         runIter(dataSet = d, 
                 params = p, 
                 paramChange = pc, 
                 options = o,
-                iterInfo = info)
-
+                iterInfo = info,
+                iterDir = iterDir)
     # Save state for repeatability
     saveDir = "final"
     iterDir = os.path.join(resultsDir, saveDir)
     if not os.path.exists(iterDir):
         os.mkdir(iterDir)
+    betaSigma = np.array([p.lnbeta, p.lnsigma2, pc.lnbeta, pc.lnsigma2])
     betaSigma.tofile(os.path.join(iterDir, "betaSigma"))
     p.param.tofile(os.path.join(iterDir, "param" ))
     p.X.tofile(os.path.join(iterDir, "X" ))
@@ -268,7 +408,7 @@ def run(latentDim, dataSetName, experimentNo, options):
     pc.X_u.tofile(os.path.join(iterDir, "inducingChange" ))
 
 
-def runIter(dataSet, params, paramChange, options, iterInfo):
+def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
     o = options
     d = dataSet
     p = params
@@ -276,8 +416,15 @@ def runIter(dataSet, params, paramChange, options, iterInfo):
     it = iterInfo
     numUsers = len(it.userOrder)
     latentDim = p.X.shape[1]
-    
+    countShouldBe = iterInfo.iterNum*numUsers
+ 
     for user in it.userOrder:
+        if it.count>countShouldBe:
+            # for when we are restarting --- get count/user up to right value.
+            countShouldBe = countShouldBe + 1
+            startCount = countShouldBe
+            continue
+        countShouldBe = countShouldBe +1
         learnRate = 1.0/(o.lambdaVal*(it.count + o.t0))
         u = d.data.user(user)
         filmRatings = u.ratings()
@@ -299,11 +446,15 @@ def runIter(dataSet, params, paramChange, options, iterInfo):
         # Xiter, yiter, paramIter are the things to be passed to the
         # nl.gp model for finding the gradient. They must be in the
         # form of nl.matrix().
-        Xiter = nl.matrix()
-        Xiter.fromarray(p.X[filmIndices, :])
-
-        yiter = nl.matrix()
-        yiter.fromarray(y)
+        Xiter = nl.matrix(len(filmIndices), latentDim)
+        yiter = nl.matrix(len(filmIndices), 1)
+        count3 = 0
+        for i in filmIndices:
+            yiter.setVal(y[count3, 0], count3, 0)
+            for j in range(latentDim):
+                Xiter.setVal(p.X[i, j], count3, j)
+            count3=count3 + 1
+                
 
         paramIter = nl.matrix()
 
@@ -337,7 +488,9 @@ def runIter(dataSet, params, paramChange, options, iterInfo):
             p.param[0, -1] = p.lnsigma2 
 
             model = nl.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, nl.gp.FTC, 0, 3)
-            paramIter.fromarray(p.param)
+            paramIter = nl.matrix(p.param.shape[0], p.param.shape[1])
+            for i in range(p.param.shape[1]):
+                paramIter.setVal(p.param[0, i], 0, i)
             model.setOptParams(paramIter)
             model.setOptimiseX(True)    
 
@@ -404,7 +557,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo):
             toc = time.time()
             eTime = toc - it.tic;
             totTime = toc - it.tic0;
-            usersPerSecond = it.count/totTime
+            usersPerSecond = (it.count-startCount)/totTime
             remainUserIters = numUsers*o.numIters - it.count
             remainTime = remainUserIters/usersPerSecond
             it.tic = toc

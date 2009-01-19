@@ -7,7 +7,6 @@ import collab
 import ndlml as nl
 opt = collab.options()
 opt.resultsBaseDir = "/local/data/results/netflix/"
-opt.showEvery = 1
 
 try:
     collab.run(latentDim=2,  \
@@ -18,3 +17,4 @@ except:
     import pdb, sys
     e, m, tb = sys.exc_info()
     pdb.post_mortem(tb)
+b
