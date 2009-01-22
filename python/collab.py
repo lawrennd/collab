@@ -10,6 +10,14 @@ import pyflix.datasets
 import numpy as np
 import ndlml as nl
 import math
+import netlab
+
+def dataDir():
+    return os.path.join('/local', 'data', 'pyflix')
+
+def resultsDir():
+    return os.path.join('/local', 'data', 'results', 'netflix')
+
 
 
 class iterInfo:
@@ -71,7 +79,7 @@ class options:
     # How often to save status 
     saveEvery= 20000
     numIters = 10
-    resultsBaseDir = "."
+    resultsBaseDir = resultsDir()
     
         
 def loadData(dataSetName):
@@ -79,7 +87,7 @@ def loadData(dataSetName):
     if dataSetName=="netflix":
         isNetflix = True
         # load in data netflix.
-        baseDir = os.path.join('/local', 'data', 'pyflix')
+        baseDir = dataDir()
         print "Loading netflix data ..."
         data = pyflix.datasets.RatedDataset(os.path.join(baseDir, 'training_set'))
         movieIDs = data.movieIDs()
@@ -242,12 +250,12 @@ def restart(loadIter, startCount, loadUser, latentDim, dataSetName, experimentNo
                                               loadDir1, 
                                               "userOrder"),
                             dtype=int)
-
+    
     
     loadDir2 = "count" + str(startCount) + "_user" + str(loadUser)
-
+    
     loadDir = os.path.join(resultsDir, loadDir1, loadDir2)
-
+    
     p, pc = loadResults(loadDir, latentDim, o)
 
 
@@ -428,45 +436,87 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
             countShouldBe = countShouldBe + 1
             startCount = countShouldBe
             continue
+
         countShouldBe = countShouldBe +1
+
         learnRate = 1.0/(o.lambdaVal*(it.count + o.t0))
         u = d.data.user(user)
         filmRatings = u.ratings()
         filmIndices = u.values()-1
 
+        # Check whether we need to do sparse approximation.
+        sparseApprox = False
+        sparseFTC = False
         if len(filmRatings)>o.maxFTC:
-            it.numSparse += 1
             if o.sparseApprox==nl.gp.FTC:
-                # Assume that we are ignoring large data.
-                print "Warning, skipping data point with ", len(filmRatings), " ratings."
-                continue
-            sparseApprox = True
-        else:
+                sparseFTC = True # just do FTC multiple times.
+            else:
+                sparseApprox = True  # do a real sparse approximation.
+        
+        if sparseFTC:
+
+            parts = int(round(float(len(filmRatings))/750 + 0.5))
+            splitPoint = len(filmRatings)/parts
+            startPoint = 0
+            for i in range(parts-1):
+                if i == parts-1:
+                    endPoint = -1
+                else:
+                    endPoint = startPoint+splitPoint
+                Xiter, yiter = \
+                convertNlMatrix(filmRatings = \
+                                filmRatings[startPoint:endPoint].flatten(),
+                                filmIndices = \
+                                filmIndices[startPoint:endPoint].flatten(),
+                                dataSet = d,
+                                parameters = p)
+
+                model = nl.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, nl.gp.FTC, 0, 3)
+                paramIter = nl.matrix(p.param.shape[0], p.param.shape[1])
+                for i in range(p.param.shape[1]):
+                    paramIter.setVal(p.param[0, i], 0, i)
+                model.setOptParams(paramIter)
+                model.setOptimiseX(True)    
+
+                # Do additional parameter changes
+                p, pc = updateParam(filmIndices[startPoint:endPoint].flatten(),
+                                    model, p, pc, sparseApprox, 
+                                    learnRate, options)
+
+                startPoint = endPoint
+                
+                
+                
+            endPoint = -1 
+            filmRatings = filmRatings[startPoint:endPoint].flatten()
+            filmIndices = filmIndices[startPoint:endPoint].flatten()
+            Xiter, yiter = \
+            convertNlMatrix(filmRatings = \
+                            filmRatings,
+                            filmIndices = \
+                            filmIndices,
+                            dataSet = d,
+                            parameters = p)
             sparseApprox = False
-
-        # Remove movie means and divide by movie standard deviations.
-        y = np.reshape((filmRatings-d.movieMean[filmIndices].flatten())/d.movieStd[filmIndices].flatten(), (len(filmIndices), 1))
-
-        # Xiter, yiter, paramIter are the things to be passed to the
-        # nl.gp model for finding the gradient. They must be in the
-        # form of nl.matrix().
-        Xiter = nl.matrix(len(filmIndices), latentDim)
-        yiter = nl.matrix(len(filmIndices), 1)
-        count3 = 0
-        for i in filmIndices:
-            yiter.setVal(y[count3, 0], count3, 0)
-            for j in range(latentDim):
-                Xiter.setVal(p.X[i, j], count3, j)
-            count3=count3 + 1
+        else:
+            # Remove movie means and divide by movie standard deviations.
+            Xiter, yiter = convertNlMatrix(filmRatings = filmRatings,
+                                           filmIndices = filmIndices,
+                                           dataSet = d,
+                                           parameters = p)
                 
 
         paramIter = nl.matrix()
 
 
+
         if sparseApprox:
-            # Set up GPLVM with sparse approximation.
             p.param[0, -1] = p.lnbeta
             pc.param[0, -1] = pc.lnbeta 
+
+                
+
+            # Set up GPLVM with sparse approximation.
             model = nl.gp(latentDim, 1, Xiter, yiter, p.sparseKern, p.noise, o.sparseApprox, o.numActive, 3)
             paramIter.resize(1, o.numActive*latentDim+p.fullKern.getNumParams())
 
@@ -497,53 +547,9 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
                 paramIter.setVal(p.param[0, i], 0, i)
             model.setOptParams(paramIter)
             model.setOptimiseX(True)    
+        
 
-        giter = nl.matrix(1, model.getOptNumParams())
-        model.computeObjectiveGradParams(giter)
-        g = np.zeros((giter.getRows(), giter.getCols()))
-        g = giter.toarray()
-
-        ####### Get X Gradients and update #######################
-        endPoint = model.getNumData()*latentDim
-        # Add "weight decay" term to gradient.
-        gX = g[0, 0:endPoint].reshape((latentDim, model.getNumData())).transpose() 
-
-        # find the last changes associated with these indices.
-        XTempChange = pc.X[filmIndices, :]
-
-        # momentum times the last change plus gradient times learning
-        # rate is new change.
-        adjustRates = d.learnRateAdjust[filmIndices]*learnRate
-        adjustRates[np.nonzero(adjustRates>o.maxLearnRate)] = o.maxLearnRate
-        XTempChange = XTempChange*o.momentum + gX*adjustRates
-        # store new change
-        pc.X[filmIndices, :] = XTempChange
-        # update X
-        p.X[filmIndices, :] = p.X[filmIndices, :] - XTempChange
-        # Apply "weight decay" globally to X --- v. sparse stray data
-        # points back towards the centre.
-        p.X = p.X - p.X*learnRate 
-
-        if sparseApprox:
-        ####### Get inducing variagle gradients and update #######
-            startPoint = endPoint 
-            endPoint = startPoint + o.numActive*latentDim
-            gX_u = g[0, startPoint:endPoint].reshape((model.getInputDim(), o.numActive)).transpose()
-
-            # update inducingChange
-            pc.X_u = pc.X_u*o.momentum + gX_u*learnRate
-
-            # update X_u
-            p.X_u = p.X_u - pc.X_u
-
-        ####### Get parameter gradients and update ###################
-        startPoint = endPoint
-        endPoint = startPoint + p.fullKern.getNumParams()
-
-        # update paramChange
-        pc.param = pc.param*o.momentum + g[0, startPoint:endPoint]*learnRate
-        # update parameters
-        p.param = p.param - pc.param
+        p, pc = updateParam(filmIndices, model, p, pc, sparseApprox, learnRate, options)
 
         # extract beta/sigma2 from the model.
         if sparseApprox:
@@ -595,4 +601,165 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
             sys.stdout.flush()
 
 
+def updateParam(filmIndices, model, p, pc, sparseApprox, learnRate, o):
 
+    latentDim = p.X.shape[1]
+    giter = nl.matrix(1, model.getOptNumParams())
+    model.computeObjectiveGradParams(giter)
+    g = np.zeros((giter.getRows(), giter.getCols()))
+    g = giter.toarray()
+
+    ####### Get X Gradients and update #######################
+    endPoint = model.getNumData()*latentDim
+    # Add "weight decay" term to gradient.
+    gX = g[0, 0:endPoint].reshape((latentDim, model.getNumData())).transpose() 
+
+    # find the last changes associated with these indices.
+    XTempChange = pc.X[filmIndices, :]
+
+    # momentum times the last change plus gradient times learning
+    # rate is new change.
+    #adjustRates = d.learnRateAdjust[filmIndices]*learnRate
+    ##adjustRates[np.nonzero(adjustRates>o.maxLearnRate)] = o.maxLearnRate
+    adjustRates = learnRate*10.0
+    XTempChange = XTempChange*o.momentum + gX*adjustRates
+    # store new change
+    pc.X[filmIndices, :] = XTempChange
+    # update X
+    p.X[filmIndices, :] = p.X[filmIndices, :] - XTempChange
+    # Apply "weight decay" globally to X --- v. sparse stray data
+    # points back towards the centre.
+    #p.X = p.X - p.X*learnRate 
+
+    if sparseApprox:
+    ####### Get inducing variable gradients and update #######
+        startPoint = endPoint 
+        endPoint = startPoint + o.numActive*latentDim
+        gX_u = g[0, startPoint:endPoint].reshape((model.getInputDim(), o.numActive)).transpose()
+        
+        # update inducingChange
+        pc.X_u = pc.X_u*o.momentum + gX_u*learnRate
+        
+        # update X_u
+        p.X_u = p.X_u - pc.X_u
+
+    ####### Get parameter gradients and update ###################
+    startPoint = endPoint
+    endPoint = startPoint + p.fullKern.getNumParams()
+
+    # update paramChange
+    pc.param = pc.param*o.momentum + g[0, startPoint:endPoint]*learnRate
+    # update parameters
+    p.param = p.param - pc.param
+    return p, pc
+
+
+def predVal(user, testFilmId, parameters, dataSet):
+    """Make a prediction for the given user and the given film ID."""
+
+    latentDim = parameters.X.shape[1]
+    useForPred = 500
+    u = dataSet.data.user(user)
+    filmRatings = u.ratings()
+    filmIndices = u.values()-1
+    d2 = netlab.dist2(parameters.X[filmIndices, :], parameters.X[testFilmId, :].reshape((1, latentDim)))
+    if useForPred < len(filmIndices):
+        perm = np.argsort(d2, axis=0)
+        filmRatings = filmRatings[perm[0:useForPred]].flatten()
+        filmIndices = filmIndices[perm[0:useForPred]].flatten()
+
+    xstar = nl.matrix(1, latentDim)
+    for i in range(latentDim):
+        xstar.setVal(parameters.X[testFilmId, i], i)
+    
+    X, y = convertNlMatrix(filmRatings=filmRatings, \
+                               filmIndices=filmIndices, \
+                               dataSet=dataSet, \
+                               parameters=parameters)
+    K = nl.matrix(X.getRows(), X.getRows())
+    kstar = nl.matrix(X.getRows(), 1)
+    pred = nl.matrix(X.getRows(), 1)
+
+    parameters.fullKern.compute(K, X);
+    parameters.fullKern.compute(kstar, X, xstar);
+    K.pdinv() # now invK
+    pred.gemv(K, kstar, 1.0, 0.0, "n") # K
+    mean = pred.dotColCol(0, y, 0)
+    diag = parameters.fullKern.diagComputeElement(xstar, 0)
+    var = diag - pred.dotColCol(0, kstar, 0)
+    return mean, var
+
+
+def preprocessRatings(filmRatings, filmIndices, dataSet):
+    """Run the preprocessing of the film ratings using the mean for
+    the movie and its standard deviation"""
+
+    y = np.reshape((filmRatings.flatten()-dataSet.movieMean[filmIndices].flatten()) \
+                       /dataSet.movieStd[filmIndices].flatten(), \
+                       (len(filmIndices), 1))
+
+    return y
+
+def convertNlMatrix(filmRatings, filmIndices, dataSet, parameters):
+    """Take in the filmRatings vector and the film indices data along with the data set and the parameters. Return ndlml.matrix for X and y"""
+    
+    latentDim = parameters.X.shape[1]
+    y = preprocessRatings(filmRatings=filmRatings, \
+                              filmIndices=filmIndices, \
+                              dataSet=dataSet)
+    
+    # Xiter, yiter, paramIter are the things to be passed to the
+    # nl.gp model for finding the gradient. They must be in the
+    # form of nl.matrix().
+    Xiter = nl.matrix(len(filmIndices), latentDim)
+    yiter = nl.matrix(len(filmIndices), 1)
+    count3 = 0
+    for i in filmIndices:
+        yiter.setVal(y[count3, 0], count3, 0)
+        for j in range(latentDim):
+            Xiter.setVal(parameters.X[i, j], count3, j)
+        count3=count3 + 1
+    return Xiter, yiter
+
+
+def predictProbe(latentDim, dataSetName, experimentNo, loadIter, loadUser, loadCount, options):
+
+    resultsDir = os.path.join(options.resultsBaseDir, "netflix" + str(experimentNo))
+
+    loadDir1 = "iter" + str(loadIter)
+    loadDir2 = "count" + str(loadCount) + "_user" + str(loadUser)
+
+    loadDir = os.path.join(resultsDir, loadDir1, loadDir2)
+
+    p, pc = loadResults(loadDir, latentDim, options)
+
+    d = loadData(dataSetName)
+
+    print "Loading netflix probe data ..."
+    probe = pyflix.datasets.RatedDataset(os.path.join(dataDir(),'probe_set'))
+
+    total = 0
+    totalSe = 0.0
+    userIds = probe.userIDs()
+    for user in np.sort(userIds):
+        up = probe.user(user)
+
+        filmRatings = up.ratings()
+        filmIndices = up.values()-1
+        
+        u = d.data.user(user)
+        testLen = len(u.ratings())
+        count =0
+        for film in filmIndices:
+            total += 1
+            if count>9:
+                pdb.set_trace()
+            (pred, var) = predVal(user, film, p, d)
+            pred = pred*d.movieStd[film] + d.movieMean[film]
+            newSe = (pred - filmRatings[count])**2
+            totalSe += newSe
+            rmse = math.sqrt(totalSe/float(total))
+            if not np.remainder(total, 500):
+                print "Total Count: ", total, " rmse: ", rmse #, "pred ", pred, "True: ", filmRatings[count], "var: ", var
+            count += 1
+            
