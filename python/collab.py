@@ -164,10 +164,10 @@ def extractKernType(latentDim, lnsigma2, options):
 
 def loadResults(loadDir, latentDim, options):
 
-    X = np.fromfile(os.path.join(loadDir, "X")).reshape(latentDim, -1).transpose()
-    Xchange = np.fromfile(os.path.join(loadDir, "Xchange")).reshape(latentDim, -1).transpose()
-    X_u = np.fromfile(os.path.join(loadDir, "X_u")).reshape(latentDim, -1).transpose()
-    inducingChange = np.fromfile(os.path.join(loadDir, "inducingChange")).reshape(latentDim, -1).transpose()
+    X = np.fromfile(os.path.join(loadDir, "X")).reshape(-1, latentDim)
+    Xchange = np.fromfile(os.path.join(loadDir, "Xchange")).reshape(-1, latentDim)
+    X_u = np.fromfile(os.path.join(loadDir, "X_u")).reshape(-1, latentDim)
+    inducingChange = np.fromfile(os.path.join(loadDir, "inducingChange")).reshape(-1, latentDim)
 
     betaSigma = np.fromfile(os.path.join(loadDir, "betaSigma")).reshape(1, 4)
     lnsigma2 = betaSigma[0,1]
@@ -290,6 +290,7 @@ def restart(loadIter, startCount, loadUser, latentDim, dataSetName, experimentNo
                 iterInfo = info,
                 iterDir = iterDir)
 
+        startCount = info.count
     # Save state for repeatability
     saveDir = "final"
     iterDir = os.path.join(resultsDir, saveDir)
@@ -357,11 +358,11 @@ def run(latentDim, dataSetName, experimentNo, options):
 
     numSparse = 0
     print "Starting ..."
-    tic = time.time()
-    tic0 = tic
     count = 0
 
     for iter in range(o.numIters):
+        tic = time.time()
+        tic0 = tic
         # Ensure repeatability
         state = np.random.get_state()
         # Order users randomly
@@ -393,6 +394,9 @@ def run(latentDim, dataSetName, experimentNo, options):
                 options = o,
                 iterInfo = info,
                 iterDir = iterDir)
+
+        count = info.count
+
     # Save state for repeatability
     saveDir = "final"
     iterDir = os.path.join(resultsDir, saveDir)
@@ -417,7 +421,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
     numUsers = len(it.userOrder)
     latentDim = p.X.shape[1]
     countShouldBe = iterInfo.iterNum*numUsers
- 
+    startCount = countShouldBe
     for user in it.userOrder:
         if it.count>countShouldBe:
             # for when we are restarting --- get count/user up to right value.
