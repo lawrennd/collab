@@ -3,6 +3,9 @@ function [error_L2,error_NMAE,error_NMAE_round] = computeTestErrorStrong(model,Y
 % [error_L2,error_NMAE,error_NMAE_round] = computeTestErrorStrong(model,Ytest);
 %
 % compute the test error for Strong experiments
+%
+% ??? this doesnt work
+??? this doesn't work
 
 val_L2 = 0;
 tot_L2 = 0;
@@ -28,6 +31,10 @@ for i = 1:size(Ytest, 2)
   Y_test_user = Y_train_user(tind(indexRand(end)));
   Y_train_user(tind(indexRand(end)),:) = 0;
   [mu, varsig] = collabPosteriorMeanVar(model, Y_train_user, model.X(tind(indexRand(end)), :));
+  
+  %mu = mu*model.sd(tind);
+  %mu = mu+model.mu(tind);
+  
   a = Y_test_user - mu; 
   a = [a; Ytest(elim, i)];
   val_L2 = val_L2 + a'*a;

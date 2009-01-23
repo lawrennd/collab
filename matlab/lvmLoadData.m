@@ -86,8 +86,8 @@ function [Y, lbls, Ytest, lblstest] = lvmLoadData(dataset, seedVal)
         counter = 0;
         data = [];
         all_genres = [{'Action'},{'Adventure'},{'Animation'},{'Children''s'}, ...
-                      {'Comedy'},{'Crime'},{'Documentary'},{'Drama'},{'Fantasy'},{'Film-Noir'}, ...
-                      {'Horror'},{'Musical'},{'Mystery'},{'Romance'},{'Sci-Fi'},{'Thriller'},{'War'},{'Western'}];
+            {'Comedy'},{'Crime'},{'Documentary'},{'Drama'},{'Fantasy'},{'Film-Noir'}, ...
+            {'Horror'},{'Musical'},{'Mystery'},{'Romance'},{'Sci-Fi'},{'Thriller'},{'War'},{'Western'}];
         
 
         readLine = fgets(fid);
@@ -101,7 +101,7 @@ function [Y, lbls, Ytest, lblstest] = lvmLoadData(dataset, seedVal)
           
           for i=1:length(all_genres)
             if (strfind(genre,all_genres{i}))
-              lbls(id,i) = 1;
+                lbls(id,i) = 1;
             end
           end
           
@@ -115,180 +115,308 @@ function [Y, lbls, Ytest, lblstest] = lvmLoadData(dataset, seedVal)
       end
     end
     
-   case {'movielens_80_f_1','movielens_80_f_2','movielens_80_f_3','movielens_80_f_4','movielens_80_f_5'}
-    perc_train = 0.8;
-    try 
+  case {'movielens_80_f_1','movielens_80_f_2','movielens_80_f_3','movielens_80_f_4','movielens_80_f_5'}
+      perc_train = 0.8;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
-        if_random = 0;
-        
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo, if_random);
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+if_random = 0;
+      
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo, if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-   case {'movielens_50_1','movielens_50_2','movielens_50_3','movielens_50_4','movielens_50_5'}
-    perc_train = 0.5;
-    if_random = 1;
-    try 
+      
+case {'movielens_50_1','movielens_50_2','movielens_50_3','movielens_50_4','movielens_50_5'}
+      perc_train = 0.5;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-   case {'movielens_60_1','movielens_60_2','movielens_60_3','movielens_60_4','movielens_60_5'}
-    perc_train = 0.6;
-    if_random = 1;
-    try 
+case {'movielens_60_1','movielens_60_2','movielens_60_3','movielens_60_4','movielens_60_5'}
+      perc_train = 0.6;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
    case {'movielens_70_1','movielens_70_2','movielens_70_3','movielens_70_4','movielens_70_5'}
-    perc_train = 0.7;
-    if_random = 1;
-    try 
+      perc_train = 0.7;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-   case {'movielens_80_1','movielens_80_2','movielens_80_3','movielens_80_4','movielens_80_5'}
-    perc_train = 0.8;
-    if_random = 1;
-    try 
+      
+      case {'movielens_80_1','movielens_80_2','movielens_80_3','movielens_80_4','movielens_80_5'}
+      perc_train = 0.8;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-   case {'movielens_90_1','movielens_90_2','movielens_90_3','movielens_90_4','movielens_90_5'}
-    perc_train = 0.9;
-    if_random = 1;
-    try 
+      
+      case {'movielens_90_1','movielens_90_2','movielens_90_3','movielens_90_4','movielens_90_5'}
+      perc_train = 0.9;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-   case {'movielens_30_1','movielens_30_2','movielens_30_3','movielens_30_4','movielens_30_5'}
-    perc_train = 0.3;
-    if_random = 1;
-    try 
+      
+      case {'movielens_30_1','movielens_30_2','movielens_30_3','movielens_30_4','movielens_30_5'}
+      perc_train = 0.3;
+if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
+[Y,lbls,Ytest,lblstest] = readMovieLens(perc_train, partNo,if_random);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-    %%%
+      
+      %%%
 
-   case {'movielens_strong_1','movielens_strong_2','movielens_strong_3','movielens_strong_4','movielens_strong_5'}
-    % this is the database strong
-    %perc_train = -1;
-    %if_random = 1;
-    try 
+      case {'movielens_strong_1','movielens_strong_2','movielens_strong_3','movielens_strong_4','movielens_strong_5'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLensStrong(partNo);
+[Y,lbls,Ytest,lblstest] = readMovieLensStrong(partNo);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
-    
-   case {'movielens_weak_1','movielens_weak_2','movielens_weak_3','movielens_weak_4','movielens_weak_5'}
-    % this is the database strong
-    %perc_train = -1;
-    %if_random = 1;
-    try 
+      
+      case {'movielens_weak_1','movielens_weak_2','movielens_weak_3','movielens_weak_4','movielens_weak_5'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
       load([baseDir, dataset, '.mat']);
       
-    catch
-      [void, errid] = lasterr;
-      if strcmp(errid, 'MATLAB:load:couldNotReadFile');
-        partNo = str2num(dataset(end));
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-        [Y,lbls,Ytest,lblstest] = readMovieLensWeak(partNo);
+[Y,lbls,Ytest,lblstest] = readMovieLensWeak(partNo);
 
-        save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
-      else
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
         error(lasterr);
+        end
       end
-    end
+      
+      case {'eachmovie_weak_1','eachmovie_weak_2','eachmovie_weak_3','eachmovie_weak_4','eachmovie_weak_5'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
+      load([baseDir, dataset, '.mat']);
+      
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
 
-    
+[Y,lbls,Ytest,lblstest] = readEachMovieWeak(partNo);
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+      
+      case {'eachmovie_marlin_weak_1','eachmovie_marlin_weak_2','eachmovie_marlin_weak_3'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
+      load([baseDir, dataset, '.mat']);
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+
+[Y,lbls,Ytest,lblstest] = readEachMovieMarlinWeak(partNo); 
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+      
+      case {'eachmovie_marlin_strong_1','eachmovie_marlin_strong_2','eachmovie_marlin_strong_3'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
+      load([baseDir, dataset, '.mat']);
+      
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+
+[Y,lbls,Ytest,lblstest] = readEachMovieMarlinStrong(partNo);
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+      
+      case {'movielens_marlin_weak_1','movielens_marlin_weak_2','movielens_marlin_weak_3'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
+      load([baseDir, dataset, '.mat']);
+      % get the extra info
+      load([baseDir, 'movielens_metadata.mat']);
+      
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+
+[Y,lbls,Ytest,lblstest] = readMovieLensMarlinWeak(partNo);
+% get the extra info
+      load([baseDir, 'movielens_metadata.mat']);
+      
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+      
+      case {'movielens_marlin_strong_1','movielens_marlin_strong_2','movielens_marlin_strong_3'}
+          % this is the database strong
+      %perc_train = -1;
+%if_random = 1;
+      try 
+      load([baseDir, dataset, '.mat']);
+      % get the extra info
+      %load([baseDir, 'movielens_metadata.mat']);
+      
+      
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+
+[Y,lbls,Ytest,lblstest] = readMovieLensMarlinStrong(partNo);
+% get the extra info
+      kk = load([baseDir, 'movielens_metadata.mat']);
+lblstest = kk.lbls;
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+
+case {'movielens_10M_1','movielens_10M_2_2','movielens_10M_3','movielens_10M_4','movielens_10M_5'}
+      try 
+      load([baseDir, dataset, '.mat']);
+      
+      catch
+        [void, errid] = lasterr;
+        if strcmp(errid, 'MATLAB:load:couldNotReadFile');
+            partNo = str2num(dataset(end));
+
+[Y,lbls,Ytest,lblstest] = readMovieLens10M(partNo);
+
+            save([baseDir, dataset, '.mat'], 'Y', 'lbls', 'Ytest', 'lblstest');
+         else
+        error(lasterr);
+        end
+      end
+
+
+      
    case {'movielensSmall1', 'movielensSmall2', 'movielensSmall3', 'movielensSmall4', 'movielensSmall5'}
 
     partNo = str2num(dataset(end));

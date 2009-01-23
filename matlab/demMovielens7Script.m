@@ -1,7 +1,7 @@
-function[] = demMovielens6script(substract_mean, partNo_v, latentDim_v,iters)
-% DEMMOVIELENS6Script Try collaborative filtering on the large movielens data.
+function[] = demMovielens7script(substract_mean, partNo_v, latentDim_v,iters)
+% DEMMOVIELENS7Script Try collaborative filtering on the large movielens data.
 %
-  % demMovielens6script(substract_mean, partNo_v, latentDim_v, iters)
+  % demMovielens7script(substract_mean, partNo_v, latentDim_v,iters)
 %
 % substract_mean --> bool if substract the mean
 % partNo_v --> vector with the partitions to compute results
@@ -23,7 +23,7 @@ for i_latent=1:length(latentDim_v)
     for i_part=1:length(partNo_v)
         partNo = partNo_v(i_part);
 
-        dataSetName = ['movielens_strong_',num2str(partNo)];
+        dataSetName = ['movielens_weak_',num2str(partNo)];
         
         disp(['Reading ... ',dataSetName]);
         
@@ -103,7 +103,7 @@ options.saveName = ['dem' capName num2str(experimentNo) '_'];
 	  disp('Computing test error');
 
 
-[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorStrong(model,Ytest)
+[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorWeak(model,Y,Ytest)
 
 
         % Save the results.

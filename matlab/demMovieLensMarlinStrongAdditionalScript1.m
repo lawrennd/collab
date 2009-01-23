@@ -1,12 +1,16 @@
-function[] = demMovielens6script(substract_mean, partNo_v, latentDim_v,iters)
-% DEMMOVIELENS6Script Try collaborative filtering on the large movielens data.
+function [] = demMovieLensMarlinStrongAdditionalScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
+% DEMMOVIELENSMARLINSTRONGADDITIONALSCRIPT1 Try collaborative filtering on the Movielens data with
+% Marlins partitions
+% where the strong movielens experiment
 %
-  % demMovielens6script(substract_mean, partNo_v, latentDim_v, iters)
+  % demMovieLensMarlinStrongAdditionalScript1(substract_mean, partNo_v,
+  % latentDim_v,iters, inverted)
 %
 % substract_mean --> bool if substract the mean
 % partNo_v --> vector with the partitions to compute results
 % latentDim_v --> vector with the latent dimensionalities to compute results
 % iters --> number of iterations
+% if inverted = true, then learn users as examples and not movies
 
 randn('seed', 1e5);
 rand('seed', 1e5);
@@ -22,12 +26,19 @@ for i_latent=1:length(latentDim_v)
     q = latentDim_v(i_latent);
     for i_part=1:length(partNo_v)
         partNo = partNo_v(i_part);
-
-        dataSetName = ['movielens_strong_',num2str(partNo)];
+        
+        dataSetName = ['movielens_marlin_strong_',num2str(partNo)];
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+[Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
+        
+        Ytraintest = lbls;
+        
+        if (inverted)
+            Y = Y';
+            Ytest = Y';
+        end
         
         numFilms = size(Y,1);
         numUsers = size(Y,2);
@@ -44,8 +55,8 @@ for i_latent=1:length(latentDim_v)
                 stdY = std(ratings);
                 %keyboard;
                 index = find(Y);
-                Y(index) = Y(index) - meanY;
-                Y(index) = Y(index) / stdY;
+                %Y(index) = Y(index) - meanY;
+                %Y(index) = Y(index) / stdY;
             else
                  for i=1:numFilms
                     % compute the mean and standard deviation of each film
@@ -55,10 +66,10 @@ for i_latent=1:length(latentDim_v)
                     length_v = length(ind) + nnz(Ytest(i,:));
                     mean_v = mean_v/length_v;
                     std_v = (length(ind)*std(Y(i,ind)) + nnz(Ytest(i,:))*std(Ytest(i,:)))/length_v;
-                    Y(i,ind) = Y(i,ind) - mean_v;
-                    if (std_v>0) 
-                        Y(i,ind) = Y(i,ind)/std_v;
-                    end
+                    %Y(i,ind) = Y(i,ind) - mean_v;
+                    %if (std_v>0) 
+                    %    Y(i,ind) = Y(i,ind)/std_v;
+                    %end
                     meanFilms(i) = mean_v;
                     stdFilms(i) = std_v;
                 end
@@ -66,8 +77,21 @@ for i_latent=1:length(latentDim_v)
             %keyboard;
         end
 
-        options = collabOptions;
-        model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+
+type = {'cmpnd', {'tensor', 'rbf', 'rbfAdditional'}, 'bias', 'white'};
+options.kern = kernCreate(q, type);
+options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 1, [1:q-1]);
+options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 2, [q]);
+options.kern.comp{1}.comp{2}.additional = lblstest; % we store additional info in lblstest
+model = collabCreateTensor(q, size(Y, 2), size(Y, 1), options);
+% put the last component to be the index
+
+	
+        %options = collabOptions;
+        %model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+
+
+
         % keyboard;
         if (substract_mean)
             if 0
@@ -103,16 +127,18 @@ options.saveName = ['dem' capName num2str(experimentNo) '_'];
 	  disp('Computing test error');
 
 
-[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorStrong(model,Ytest)
+[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorWeak(model,Ytraintest,Ytest)
 
 
         % Save the results.
         capName = dataSetName;
         capName(1) = upper(capName(1));
         
-        saveResults = [capName,'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
+        saveResults = [capName,'_additional_inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
         disp(['Saving ... ',saveResults]);
         save(saveResults, 'model', 'L2_error','options','NMAE_error','NMAE_round_error');
     end
 end
+
+
 

@@ -65,7 +65,7 @@ for i_latent=1:length(latentDim_v)
 
         capName = dataSetName;
         capName(1) = upper(capName(1));
-options.saveName = ['dem' capName num2str(experimentNo) '_'];
+        options.saveName = ['dem' capName num2str(experimentNo) '_'];
 
         model = collabOptimise(model, Y, options)
 

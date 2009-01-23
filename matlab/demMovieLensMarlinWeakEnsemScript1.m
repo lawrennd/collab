@@ -1,12 +1,17 @@
-function[] = demMovielens6script(substract_mean, partNo_v, latentDim_v,iters)
-% DEMMOVIELENS6Script Try collaborative filtering on the large movielens data.
+function [] = demMovieLensMarlinWeakScript1(substract_mean, partNo_v, latentDim_v,iters, inverted, type)
+% DEMMOVIELENSMARLINWEAKSCRIPT1 Try collaborative filtering on the EachMovie data with
+% Marlins partitions
+% where the weak movielens experiment
 %
-  % demMovielens6script(substract_mean, partNo_v, latentDim_v, iters)
+  % demMovieLensMarlinWeakScript1(substract_mean, partNo_v,
+				  % latentDim_v,iters, inverted, type)
 %
 % substract_mean --> bool if substract the mean
 % partNo_v --> vector with the partitions to compute results
 % latentDim_v --> vector with the latent dimensionalities to compute results
 % iters --> number of iterations
+% if inverted = true, then learn users as examples and not movies
+% type --> weak or strong
 
 randn('seed', 1e5);
 rand('seed', 1e5);
@@ -14,22 +19,32 @@ rand('seed', 1e5);
 experimentNo = 3;
 
 
+predictions = zeros(length(latentDim_v),length(partNo_v));
+modelsActive = ones(length(latentDim_v),length(partNo_v));
+
 %partNo_v = [1:5];
 %latentDim_v = [5, 2:4, 6];
 
 
-for i_latent=1:length(latentDim_v)
-    q = latentDim_v(i_latent);
+
+% for each partition load the data
     for i_part=1:length(partNo_v)
         partNo = partNo_v(i_part);
-
-        dataSetName = ['movielens_strong_',num2str(partNo)];
+numActive = 0;
+allModels = [];
+ 
+        dataSetName = ['movielens_marlin_',type,'_',num2str(partNo)];
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, lbls, Ytest] = lvmLoadData(dataSetName);
+
+        if (inverted)
+            Y = Y';
+            Ytest = Y';
+        end
         
-        numFilms = size(Y,1);
+	numFilms = size(Y,1);
         numUsers = size(Y,2);
         meanFilms = zeros(numFilms,1);
         stdFilms = ones(numFilms,1);
@@ -66,53 +81,56 @@ for i_latent=1:length(latentDim_v)
             %keyboard;
         end
 
-        options = collabOptions;
-        model = collabCreate(q, size(Y, 2), size(Y, 1), options);
-        % keyboard;
-        if (substract_mean)
-            if 0
-                % this does the global mean
-                model.mu = repmat(meanY,size(model.mu,1),1);
-                model.sd = repmat(stdY,size(model.sd,1),1);
-            else
-                model.mu = meanFilms;
-                model.sd = stdFilms;
-            end
-            
-        end
-        model.kern.comp{2}.variance = 0.11;
-        model.kern.comp{3}.variance =  5; 
-        options = collabOptimiseOptions;
-        
+	for i_latent=1:length(latentDim_v)
+	  q = latentDim_v(i_latent);
 
-        % set parameters
-        options.momentum = 0.9;
-        options.learnRate = 0.0001;
-        options.paramMomentum = 0.9;
-        options.paramLearnRate = 0.0001;
-        options.numIters = iters;
-        options.showLikelihood = false;
-
+% load the model
+        % Save the results.
         capName = dataSetName;
         capName(1) = upper(capName(1));
-options.saveName = ['dem' capName num2str(experimentNo) '_'];
+        
+        loadResults = [capName,'inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
+        disp(['Loading ... ',loadResults]);
+try
+	load(loadResults);
+catch
+disp(['Model not found ',loadResults]);
+%keyboard;
+continue;
+end
+numActive = numActive + 1;
+allModels{numActive} = model;
 
-        model = collabOptimise(model, Y, options)
 
-	% compute the test error
-	  disp('Computing test error');
+%modelsActive(q) = 1;
+end
 
 
-[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorStrong(model,Ytest)
+%%%%%%%%
+% compute the test error
+disp('Computing test error');
 
+% compute the test error for ensembles of models
+
+if strcmp(type,'weak')
+
+  [L2_error,NMAE_error,NMAE_round_error] = computeTestErrorEnsemblesWeak(allModels,Y,Ytest)
+ else if strcmp(type,'strong')
+
+[L2_error,NMAE_error,NMAE_round_error] = computeTestErrorEnsemblesWeak(allModels,lbls,Ytest)
+end
+end
+
+%[mu] = computePredictionsErrorWeak(model,Y,Ytest)
 
         % Save the results.
         capName = dataSetName;
         capName(1) = upper(capName(1));
         
-        saveResults = [capName,'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
+saveResults = [capName,'inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(partNo),'_iters_',num2str(iters),'_ensembles.mat'];
         disp(['Saving ... ',saveResults]);
-        save(saveResults, 'model', 'L2_error','options','NMAE_error','NMAE_round_error');
+save(saveResults, 'allModels', 'L2_error','options','NMAE_error','NMAE_round_error','modelsActive');
     end
-end
+  
+  
 

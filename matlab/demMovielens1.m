@@ -18,8 +18,7 @@ model.kern.comp{3}.variance =  5;
 options = collabOptimiseOptions;
 options.numIters = 30;
 options.showLikelihood = false;
-
-  model = collabOptimise(model, Y, options)
+model = collabOptimise(model, Y, options)
   
 val = 0;
 tot = 0;
