@@ -1,7 +1,7 @@
 % COLLABTOOLBOXES Load in the relevant toolboxes for collaborative filtering.
 
 importLatest('netlab');
-importLatest('ndlutil');
+importTool('ndlutil');
 importTool('mltools');
 importLatest('optimi');
 importTool('datasets');
