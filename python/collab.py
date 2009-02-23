@@ -371,7 +371,7 @@ class ppca(optimi.optimisable):
             CinvSumSum = h.T*CinvSum
             gsigma_b = 0.5*(CinvySum*CinvySum - CinvSumSum)
             gX = np.multiply(h, gX)
-            gd = 0.5*np.multiply(1./self.d[self.indices, :],
+            gd = 0.5*np.multiply(1/self.d[self.indices, :],
                                  (np.multiply(Cinvy, Cinvy) - CinvTr))
         else:
             CinvySum = Cinvy.sum()
