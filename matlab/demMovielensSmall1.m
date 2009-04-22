@@ -12,12 +12,16 @@ for partition = 1:5
   [Y, void, Ytest] = collabLoadData(dataSetName);
   q = 2;
   options = collabOptions;
-  options.heteroNoise = true;
-  options.kern = {'rbf', 'bias'};
+  %/~
+  %options.heteroNoise = true;
+  %options.kern = {'rbf', 'bias'};
+  %~/
   model = collabCreate(q, size(Y, 2), size(Y, 1), options);
-  model.diagvar = repmat(5.0, size(model.diagvar));
+  %/~
+  %model.diagvar = repmat(5.0, size(model.diagvar));
+  %~/
   model.kern.comp{2}.variance = 0.11;
-  %model.kern.comp{3}.variance =  5; 
+  model.kern.comp{3}.variance =  5; 
   options = collabOptimiseOptions;
   
   % set parameters
@@ -46,7 +50,7 @@ for partition = 1:5
     val = val + a'*a;
     tot = tot + length(a);
   end
-  error(partition) = sqrt(val/tot);%*1.12;
+  error(partition) = sqrt(val/tot);
                                    % Save the results.
   capName = dataSetName;
   capName(1) = upper(capName(1));
