@@ -1,4 +1,4 @@
-function [g, g_param] = collabLogLikeGradients(model, y)
+function [g, g_param, g_diag] = collabLogLikeGradients(model, y)
   
 % COLLABLOGLIKEGRADIENTS Gradient of the latent points.
 % FORMAT 
@@ -9,7 +9,7 @@ function [g, g_param] = collabLogLikeGradients(model, y)
 %
 % SEEALSO : collabLogLikelihood
 %
-% COPYRIGHT : Neil D. Lawrence, 2008
+% COPYRIGHT : Neil D. Lawrence, 2008, 2009
   
 % COLLAB
 
@@ -22,7 +22,11 @@ function [g, g_param] = collabLogLikeGradients(model, y)
   end
 
   g = spalloc(size(model.X, 1), size(model.X, 2), length(fullInd)*model.q);
-
+  if model.heteroNoise
+    g_diag = spalloc(size(model.X, 1), 1, length(fullInd));
+  else
+    g_diag = [];
+  end
   maxBlock = ceil(length(fullInd)/ceil(length(fullInd)/1000));
   span = 0:maxBlock:length(fullInd);
   if rem(length(fullInd), maxBlock)
@@ -42,6 +46,10 @@ function [g, g_param] = collabLogLikeGradients(model, y)
     if ~isfield(model, 'noise') || isempty(model.noise)
       yprime = (yuse-model.mu(ind))./model.sd(ind);
       K = kernCompute(model.kern, X);
+      if model.heteroNoise
+        n = length(ind);
+        K = K + spdiags(model.diagvar(ind, :), 0, n, n);
+      end
       invK = pdinv(K);
       invKy = invK*yprime;
       gK = -invK + invKy*invKy';
@@ -64,6 +72,11 @@ function [g, g_param] = collabLogLikeGradients(model, y)
       end
       g(ind, :) = gX;
       g_param = g_param + kernGradient(model.kern, X, gK);
+
+      if model.heteroNoise
+        g_diag(ind, :) = diag(gK);
+      end
+      
     else
       yuse = yuse-1; % make yuse start from zero.
       % Create an IVM model and update site parameters.

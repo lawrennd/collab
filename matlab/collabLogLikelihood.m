@@ -17,6 +17,10 @@ function ll = collabLogLikelihood(model, y)
   for i = 1:size(y, 2)
     ind = find(y(:, i));
     K = kernCompute(model.kern, model.X(ind, :));
+    if model.heteroNoise
+      n = length(ind);
+      K = K + spdiags(model.diagvar(ind, :), 0, n, n);
+    end
     [invK, U] = pdinv(K);
     logDetK = logdet(K, U);
     yind = y(ind, i);

@@ -15,5 +15,6 @@ function options = collabOptions(approx);
   options.kern = {'rbf', 'bias', 'white'};
   options.numActive = 0;
   options.beta = [];
-
+  options.heteroNoise = false;
+  
 end

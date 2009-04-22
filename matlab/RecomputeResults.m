@@ -27,7 +27,7 @@ for i_latent=1:length(latentDim_v)
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, void, Ytest] = collabLoadData(dataSetName);
         
         if (substract_mean)
             % create the total vector

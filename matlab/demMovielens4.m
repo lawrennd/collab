@@ -19,7 +19,7 @@ options = collabOptionsTensor;
 
 
 %%%%% as in gpReversible dynamics
-type = {'cmpnd', {'tensor', 'rbf', 'rbfAdditional'}, 'bias', 'white'};
+type = {'cmpnd', {'tensor', 'rbf', 'rbfadditional'}, 'bias', 'white'};
 options.kern = kernCreate(q, type);
 %keyboard;
 options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 1, [1:q-1]);
@@ -33,7 +33,7 @@ options.kern.comp{1}.comp{2}.additional = lbls;
 
 
 % as previously
-%options.kern = {'cmpnd', {'tensor', 'rbf', 'rbfAdditional'}, 'bias', 'white'};
+%options.kern = {'cmpnd', {'tensor', 'rbf', 'rbfadditional'}, 'bias', 'white'};
 %options.kern.comp{1}.comp{1}.index = 1:q-1;
 %options.kern.comp{1}.comp{2}.index = q; 
 %options.kern.comp{1}.comp{2}.additional = lbls;
