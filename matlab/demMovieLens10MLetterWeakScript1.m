@@ -1,4 +1,4 @@
-function [] = demMovieLens10MWeakScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
+function [] = demMovieLens10MLetterWeakScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
 % DEMMOVIELENS10MWEAKSCRIPT1 Try collaborative filtering on the EachMovie data with
 % Marlins partitions
 % where the weak movielens experiment
@@ -17,6 +17,7 @@ rand('seed', 1e5);
 
 experimentNo = 3;
 
+partLetter_v = 'ab';
 
 %partNo_v = [1:5];
 %latentDim_v = [5, 2:4, 6];
@@ -25,9 +26,9 @@ experimentNo = 3;
 for i_latent=1:length(latentDim_v)
     q = latentDim_v(i_latent);
     for i_part=1:length(partNo_v)
-        partNo = partNo_v(i_part);
+      partLetter = partLetter_v(partNo_v(i_part));
         
-        dataSetName = ['movielens_10M_',num2str(partNo)];
+        dataSetName = ['movielens_10M_',partLetter];
         
         disp(['Reading ... ',dataSetName]);
         
@@ -108,6 +109,15 @@ options.saveName = ['dem' capName num2str(experimentNo) '_'];
 
         model = collabOptimise(model, Y, options)
 
+        capName = dataSetName;
+        capName(1) = upper(capName(1));
+        
+        saveResults = [capName,'inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',partLetter,'_iters_',num2str(iters),'.mat'];
+disp(['Saving ... ',saveResults]);
+                
+save(saveResults, 'model', 'options');
+
+
 	% compute the test error
 	  disp('Computing test error');
 
@@ -116,10 +126,6 @@ options.saveName = ['dem' capName num2str(experimentNo) '_'];
 
 
         % Save the results.
-        capName = dataSetName;
-        capName(1) = upper(capName(1));
-        
-        saveResults = [capName,'inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
         disp(['Saving ... ',saveResults]);
         save(saveResults, 'model', 'L2_error','options','NMAE_error','NMAE_round_error');
     end

@@ -12,18 +12,12 @@ function model = collabOptimise(model, Y, options)
 % SEEALSO : collabCreate
 %
 % COPYRIGHT : Neil D. Lawrence, 2008
-
-% COLLAB
   
-  % Present data as a cell file to save space for v. large datasets.
   if iscell(Y)
     numUsers = size(Y, 1);
   else
     numUsers = size(Y, 2);
   end
-  
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  % In case we are recovering from an earlier run.
   if isfield(options, 'randState') && ~isempty(options.randState)
     rand('state', options.randState);
   end
@@ -52,8 +46,7 @@ function model = collabOptimise(model, Y, options)
   if isfield(options, 'startUser') && ~isempty(options.startUser)
     startUser = options.startUser;
   end
-  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
+
   currIters = startUser-1+(startIter-1)*numUsers;
   oldIters = 0;
   tic
@@ -61,38 +54,30 @@ function model = collabOptimise(model, Y, options)
     for user = startUser:numUsers
       currIters = currIters + 1;
       if iscell(Y) && isempty(Y{order(user), 1})
-        % If there is an empty cell entry skip it.
         continue
       end
       runIter = runIter + 1;
       if (iscell(Y)) ||   (nnz(Y(:,order(user))))
-        if options.optimiseParam
-          if iscell(Y)
-            [g, g_param, g_diag] = collabLogLikeGradients(model, Y(order(user), :));
+          if options.optimiseParam
+            if iscell(Y)
+                [g, g_param] = collabLogLikeGradients(model, Y(order(user), :));
+            else
+                [g, g_param] = collabLogLikeGradients(model, Y(:, order(user)));
+            end
+
+            model.changeParam = model.changeParam * options.paramMomentum + options.paramLearnRate*g_param;
+            param = param + model.changeParam;
+
+            model.kern = kernExpandParam(model.kern, param);
           else
-            [g, g_param, g_diag] = collabLogLikeGradients(model, Y(:, order(user)));
+            if iscell(Y)
+                    g = collabLogLikeGradients(model, Y(order(user), :));
+            else 
+                g = collabLogLikeGradients(model, Y(:, order(user)));
+            end
           end
-          
-          model.changeParam = model.changeParam * options.paramMomentum + options.paramLearnRate*g_param;
-          param = param + model.changeParam;
-          
-          model.kern = kernExpandParam(model.kern, param);
-          if model.heteroNoise
-            ind = find(g_diag);
-            facts = expTransform(model.diagvar(ind, :), 'gradfact');
-            g_diag(ind) = g_diag(ind).*facts;
-            model.lndiagChange = model.lndiagChange*options.diagMomentum + options.diagLearnRate*g_diag;
-            model.diagvar = exp(log(model.diagvar) + model.lndiagChange);
-          end
-        else
-          if iscell(Y)
-            g = collabLogLikeGradients(model, Y(order(user), :));
-          else 
-            g = collabLogLikeGradients(model, Y(:, order(user)));
-          end
-        end
-        model.change = model.change *options.momentum+options.learnRate*g;
-        model.X = model.X + model.change;
+          model.change = model.change *options.momentum+options.learnRate*g;
+          model.X = model.X + model.change;
       end
       if ~rem(runIter, options.saveEvery)
         try
@@ -126,7 +111,7 @@ function model = collabOptimise(model, Y, options)
       err = lasterror;
       fprintf(['Error message ''' err.message ''' trapped.\n'])
     end
-    
+
   end
-    
+
 end

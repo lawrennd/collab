@@ -14,26 +14,18 @@ function model = collabCreate(q, d, N, options);
 
 % COLLAB
 
-  
-  model.type = 'collab';
-  
-  model.q = q;
-  model.d = d;
-  model.N = N;
-  model.kern = kernCreate(q, options.kern);
-  %initParams = collabExtractParam(model);
-  model.X = randn(N, q)*0.001;
-  model.change = zeros(size(model.X));
-  model.changeParam = zeros(1, model.kern.nParams);
-  model.mu = zeros(N, 1);
-  model.sd = ones(N, 1);
-  % This forces kernel computation.
-  %model = collabExpandParam(model, initParams);
-  model.heteroNoise = options.heteroNoise; % Whether or not to have diagonal
-                                           % noise variance.
-  
-  if model.heteroNoise
-    model.diagvar = repmat(exp(-2), N, 1);
-    model.lndiagChange = zeros(N, 1);
-  end
-end
+
+model.type = 'collab';
+
+model.q = q;
+model.d = d;
+model.N = N;
+model.kern = kernCreate(q, options.kern);
+%initParams = collabExtractParam(model);
+model.X = randn(N, q)*0.001;
+model.change = zeros(size(model.X));
+model.changeParam = zeros(1, model.kern.nParams);
+model.mu = zeros(N, 1);
+model.sd = ones(N, 1);
+% This forces kernel computation.
+%model = collabExpandParam(model, initParams);

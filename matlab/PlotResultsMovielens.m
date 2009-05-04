@@ -68,6 +68,7 @@ ylabel('NMAE round error');
 legend(toLeg);
 end
 
+
 %%%% hand coded plot
 figure(2)
   clf;
@@ -110,9 +111,40 @@ errorbar([2:1+max_value],mean_NMAE_round(6,1:max_value),std_NMAE_round(6,1:max_v
   xlabel('Latent dimension');         
   ylabel('NMAE');
 axis([1.7 10.3 0.385 0.43]);
+
+
+
+figure(4)
+  clf;
+hold on;
+font_size = 16;
+max_value = 9;
+set(gca,'FontSize',font_size);
+set(get(gca,'Title'),'FontSize',font_size);
+set(get(gca,'Xlabel'),'FontSize',font_size);
+set(get(gca,'Ylabel'),'FontSize',font_size);
+errorbar([2:1+max_value],mean_L2(1,1:max_value),std_L2(1,1:max_value),'r-','lineWidth',2,'markersize',12)
+errorbar([2:1+max_value],mean_L2(2,1:max_value),std_L2(2,1:max_value),'k--','lineWidth',2,'markersize',12)
+  errorbar([2:1+max_value],mean_L2(3,1:max_value),std_L2(3,1:max_value),'g-','lineWidth',2,'markersize',12)
+  errorbar([2:1+max_value],mean_L2(4,1:max_value),std_L2(4,1:max_value),'b-','lineWidth',2,'markersize',12)
+errorbar([2:1+max_value],mean_L2(5,1:max_value),std_L2(5,1:max_value),'k-','lineWidth',2,'markersize',12)
+errorbar([2:1+max_value],mean_L2(6,1:max_value),std_L2(6,1:max_value),'r--','lineWidth',2,'markersize',12)
+
+  legend([{'30 %'},{'50 %'},{'60 %'},{'70 %'},{'80 %'},{'90 %'}],'fontsize',16)
+  xlabel('Latent dimension');         
+  ylabel('RMSE');
+axis([1.7 10.3 0.84 0.94]);
+
+
 if if_print 
+figure(3)
 saveas(gcf,'latent_dim_errorbar.fig');
   print '-depsc' 'latent_dim_errorbar.eps'; 
+
+figure(4)
+saveas(gcf,'latent_dim_errorbar_RMSE.fig');
+  print '-depsc' 'latent_dim_errorbar_RMSE.eps'; 
+
 end
 
 end
@@ -129,5 +161,7 @@ value = 'g--'
 value = 'm--';
 case 5
 value = 'k-'
+case 6
+value = 'y-'
 end
 end

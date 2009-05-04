@@ -78,7 +78,7 @@ for i_latent=1:length(latentDim_v)
         end
 
 
-type = {'cmpnd', {'tensor', 'rbf', 'rbfadditional'}, 'bias', 'white'};
+type = {'cmpnd', {'tensor', 'rbf', 'rbfAdditional'}, 'bias', 'white'};
 options.kern = kernCreate(q, type);
 options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 1, [1:q-1]);
 options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 2, [q]);

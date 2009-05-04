@@ -1,4 +1,4 @@
-function [L2_error_T,NMAE_error_T,NMAE_round_error_T] = PlotResultsMovielensMarlinWeak(substract_mean,partNo_v,latentDim_v, iters, type, inverted, kernel_type)
+function [L2_error_T,NMAE_error_T,NMAE_round_error_T] = PlotResultsMovielensMarlinWeak(substract_mean,partNo_v,latentDim_v, iters, type, inverted, kernel_type, new_iters)
 %
   % [L2_error,NMAE_error,NMAE_round_error] = PlotResultsMovielensMarlinWeak(substract_mean,partNo_v,latentDim_v, iters, type, inverted, kernel_type)
 %
@@ -34,8 +34,13 @@ dataSetName = ['movielens_marlin_',type,'_',num2str(partNo)];
 
   if (nargin>6)
 
+    if (nargin>7)
+      loadResults = [capName,'_',kernel_type,'_inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'_newiters_',num2str(new_iters),'.mat'];
+
+else
             
     loadResults = [capName,'_',kernel_type,'_inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
+end
 else
         
 loadResults = [capName,'inverted_',num2str(inverted),'_norm_',num2str(substract_mean),'_',num2str(q),'_',num2str(partNo),'_iters_',num2str(iters),'.mat'];
@@ -64,7 +69,7 @@ std_NMAE(j) = std(permute(NMAE_error_T(j,:),[2 1]));
 std_NMAE_round(j) = std(permute(NMAE_round_error_T(j,:),[2 1]));
 end
 
-keyboard;
+%keyboard;
 
 %figure(1)
 %  clf;
@@ -75,7 +80,7 @@ keyboard;
 %toLeg{i} = ['Dimension ',num2str(latentDim_v(i))];
 %end
 %xlabel('percentage database');
-%ylabel('NMAE round error');
+%ylabel('NMAE error');
 %legend(toLeg);
 
 end
