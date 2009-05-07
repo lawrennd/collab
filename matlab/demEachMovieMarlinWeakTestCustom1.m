@@ -1,4 +1,4 @@
-function [] = demEachMovieMarlinWeakTest1(substract_mean, partNo_v, latentDim_v,iters,inverted)
+function [] = demEachMovieMarlinWeakTestCustom1(substract_mean, partNo_v, latentDim_v,iters,inverted)
 % DEMEACHMOVIEMARLINWEAKTEST1 Try collaborative filtering on the EachMovie data with
 % Marlins partitions
 % where the weak movielens experiment
@@ -32,7 +32,7 @@ for i_latent=1:length(latentDim_v)
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, void, Ytest] = collabLoadData(dataSetName);
         
 if (inverted)
   Y = Y';

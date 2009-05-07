@@ -9,7 +9,7 @@ rand('seed', 1e5);
 experimentNo = 3;
 
 dataSetName = 'movielens';
-[Y, lbls, Ytest] = lvmLoadData(dataSetName);
+[Y, lbls, Ytest] = collabLoadData(dataSetName);
 
 % get the extra data in the labels
 

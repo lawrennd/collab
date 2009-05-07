@@ -31,7 +31,7 @@ dataSetName = ['movielens_marlin_',type,'_',num2str(partNo)];
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, void, Ytest] = collabLoadData(dataSetName);
         
         if (substract_mean)
             % create the total vector

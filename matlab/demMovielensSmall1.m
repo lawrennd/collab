@@ -9,7 +9,7 @@ experimentNo = 1;
 
 for partition = 1:5
  dataSetName = ['movielensSmall' num2str(partition)];
- [Y, void, Ytest] = lvmLoadData(dataSetName);
+ [Y, void, Ytest] = collabLoadData(dataSetName);
  q = 5;
  options = collabOptions;
 

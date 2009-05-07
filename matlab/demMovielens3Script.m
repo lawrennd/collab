@@ -1,4 +1,4 @@
-function[] = demMovielens3script(perc_train, substract_mean, partNo_v, latentDim_v,iters)
+function[] = demMovielens3Script(perc_train, substract_mean, partNo_v, latentDim_v,iters)
 % DEMMOVIELENS3Script Try collaborative filtering on the large movielens data.
 %
   % demMovielens3script(perc_train, substract_mean, partNo_v, latentDim_v)
@@ -28,7 +28,7 @@ for i_latent=1:length(latentDim_v)
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, void, Ytest] = collabLoadData(dataSetName);
         
         if (substract_mean)
             % create the total vector

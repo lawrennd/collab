@@ -9,7 +9,7 @@ experimentNo = 3;
 ??? to be done
 
 dataSetName = 'movielens';
-[Y, void, Ytest] = lvmLoadData(dataSetName);
+[Y, void, Ytest] = collabLoadData(dataSetName);
 
 % learn latent space of each user
 Y = Y';

@@ -8,7 +8,7 @@ rand('seed', 1e5);
 experimentNo = 3;
 
 dataSetName = 'movielens';
-[Y, void, Ytest] = lvmLoadData(dataSetName);
+[Y, void, Ytest] = collabLoadData(dataSetName);
 
 q = 5;
 options = collabOptions;

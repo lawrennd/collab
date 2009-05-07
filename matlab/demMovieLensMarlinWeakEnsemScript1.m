@@ -39,7 +39,7 @@ for i_part=1:length(partNo_v)
   
   disp(['Reading ... ',dataSetName]);
   
-  [Y, lbls, Ytest] = lvmLoadData(dataSetName);
+  [Y, lbls, Ytest] = collabLoadData(dataSetName);
   
   if (inverted)
     Y = Y';

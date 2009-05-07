@@ -8,7 +8,7 @@ experimentNo = 3;
 substract_mean = 0;
 
 dataSetName = 'movielens_weak_1';
-[Y, void, Ytest] = lvmLoadData(dataSetName);
+[Y, void, Ytest] = collabLoadData(dataSetName);
 
 numFilms = size(Y,1);
 numUsers = size(Y,2);

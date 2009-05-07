@@ -34,7 +34,7 @@ for i_latent=1:length(latentDim_v)
     
     disp(['Reading ... ',dataSetName]);
     
-    [Y, lbls, Ytest] = lvmLoadData(dataSetName);
+    [Y, lbls, Ytest] = collabLoadData(dataSetName);
     
     if (inverted)
       Y = Y';

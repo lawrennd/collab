@@ -34,7 +34,7 @@ for i_latent=1:length(latentDim_v)
     
     disp(['Reading ... ',dataSetName]);
     
-    [Y, lbls, Ytest, lblstest] = lvmLoadData(dataSetName);
+    [Y, lbls, Ytest, lblstest] = collabLoadData(dataSetName);
     
     Ytraintest = lbls;
     

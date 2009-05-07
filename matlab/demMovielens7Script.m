@@ -1,4 +1,4 @@
-function[] = demMovielens7script(substract_mean, partNo_v, latentDim_v,iters)
+function[] = demMovielens7Script(substract_mean, partNo_v, latentDim_v,iters)
 % DEMMOVIELENS7Script Try collaborative filtering on the large movielens data.
 %
   % demMovielens7script(substract_mean, partNo_v, latentDim_v,iters)
@@ -27,7 +27,7 @@ for i_latent=1:length(latentDim_v)
         
         disp(['Reading ... ',dataSetName]);
         
-        [Y, void, Ytest] = lvmLoadData(dataSetName);
+        [Y, void, Ytest] = collabLoadData(dataSetName);
         
         numFilms = size(Y,1);
         numUsers = size(Y,2);
