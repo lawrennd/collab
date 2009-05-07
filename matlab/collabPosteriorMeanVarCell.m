@@ -1,4 +1,4 @@
-function [mu, varsig] = collabPosteriorMeanVarCell(model, ind, y, X);
+function [mu, varsig] = collabPosteriorMeanVarCell(model, ind, y, X)
 
 % COLLABPOSTERIORMEANVARCELL Mean and variances of the posterior at points given by X.
 % FORMAT

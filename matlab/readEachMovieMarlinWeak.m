@@ -1,26 +1,35 @@
-function [Y,lbls,Ytest,lblstest] = readEachMovieMarlinWeak(partNo)
-% [Y,lbls,Ytest,lblstest] = readEachMovieWeakpartNo)
+function [Y, Ytest] = readEachMovieMarlinWeak(partNo)
 
+% READEACHMOVIEMARLINWEAK Read in Marlin's weak partitions for EachMovie.
+% FORMAT
+% DESC reads the EachMovie Marlin weak partitions.
+% ARG partNo : the part of the EachMovie data to read in. 
+% RETURN Y : the data.
+% RETURN Ytest : the test data.
+%
+% SEEALSO : collabLoadData, readEachMovieMarlinStrong
+%
+% COPYRIGHT : Raquel Urtasun, 2009
 
-lblstest = [];
-lbls = [];
+% COLLAB
+  
+  baseDir = datasetsDirectory;
+  dirSep = filesep;
+  
+  % load the ratings
+  
+  
+  fileName = [baseDir dirSep 'jason_rennie' dirSep 'project' dirSep 'em-mmmf' dirSep 'data' dirSep 'marlin.mat'];
+  
+  disp(['Reading ... ',fileName]);
+  
+  load(fileName);
+  
+  Y = weaktrain{partNo}';
+  Ytest = weaktest{partNo}';
+end
 
-baseDir = datasetsDirectory;
-dirSep = filesep;
-
-% load the ratings
-
-
-fileName = [baseDir dirSep 'jason_rennie' dirSep 'project' dirSep 'em-mmmf' dirSep 'data' dirSep 'marlin.mat'];
-
-disp(['Reading ... ',fileName]);
-
-load(fileName);
-
-Y = weaktrain{partNo}';
-Ytest = weaktest{partNo}';
-
-
+%/~
 % find movies with too big rates
 %max_film = max(Y');
 %max_film_test = max(Ytest');
@@ -48,3 +57,4 @@ Ytest = weaktest{partNo}';
         
 %Y(toRemove,:) = [];
 %Ytest(toRemove,:) = [];
+%~/

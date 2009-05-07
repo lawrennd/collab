@@ -1,10 +1,18 @@
 function [error_L2,error_NMAE,error_NMAE_round] = computeTestErrorStrong(model,Ytest)
+% COMPUTETESTERRORSTRONG Compute the strong test error.
+% FORMAT
+% DESC computes the test error for the strong generalization.
+% ARG model : the model.
+% ARG Ytest : the test data.
+% RETURN L2_error : the l2 error.
+% RETURN NMAE_error : the NMAE error.
+% RETURN NMAE_round_error : the NMAE error with rounding on the outputs.
 %
-% [error_L2,error_NMAE,error_NMAE_round] = computeTestErrorStrong(model,Ytest);
-%
-% compute the test error for Strong experiments
-%
-% ??? this doesnt work
+% SEEALSO : computeTestErrorWeak
+% 
+% COPYRIGHT : Raquel Urtasun, 2009
+
+% COLLAB
 ??? this doesn't work
 
 val_L2 = 0;

@@ -1,15 +1,20 @@
 function [] = demEachMovieMarlinWeakScript1(substract_mean, partNo_v, latentDim_v,iters,inverted)
-% DEMEACHMOVIEMARLINWEAKSCRIPT1 Try collaborative filtering on the EachMovie data with
-% Marlins partitions
-% where the weak movielens experiment
+% DEMEACHMOVIEMARLINWEAKSCRIPT1 RBF covariance on Marlin's weak Eachmovie partitions.
+% FORMAT
+% DESC Try collaborative filtering with the RBF covariance 
+% on the Eachmovie data for Marlin's partitions for weak generalization.
+% ARG  substract_mean : bool if substract the mean.
+% ARG partNo :  vector with the partitions to compute results.
+% ARG latentDim_v : vector with the latent dimensionalities to compute results.
+% ARG iters : number of iterations.
+% ARG inverted : if true, then learn users as examples and not items.
 %
-  % demEachMovieMarlinWeakScript1(substract_mean, partNo_v, latentDim_v,iters,inverted)
+% SEEALSO collabCreate, collabOptimise
 %
-% substract_mean --> bool if substract the mean
-% partNo_v --> vector with the partitions to compute results
-% latentDim_v --> vector with the latent dimensionalities to compute results
-% iters --> number of iterations
-% if inverted = true, then learn users as examples and not movies
+% COPYRIGHT : Raquel Urtasun, 2009
+
+% COLLAB
+
 
 
 randn('seed', 1e5);

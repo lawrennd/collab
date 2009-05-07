@@ -1,16 +1,23 @@
-function [Y,lbls,Ytest,lblstest] = readEachMovieMarlinStrong(partNo)
-% [Y,lbls,Ytest,lblstest] = readEachMovieWeakpartNo)
+function [Y, lbls, Ytest] = readEachMovieMarlinStrong(partNo)
 
+% FORMAT
+% DESC reads the EachMovie Marlin strong partitions.
+% ARG partLetter : the part of the 10M MovieLens data to read in. 
+% RETURN Y : the data.
+% RETURN Ytest : the test data.
+%
+% SEEALSO : collabLoadData, readEachMovieMarlinWeak
+%
+% COPYRIGHT : Raquel Urtasun, 2009
 
-lblstest = [];
+% COLLAB
+
 lbls = [];
 
 baseDir = datasetsDirectory;
 dirSep = filesep;
 
 % load the ratings
-
-
 fileName = [baseDir dirSep 'jason_rennie' dirSep 'project' dirSep 'em-mmmf' dirSep 'data' dirSep 'marlin.mat'];
 
 disp(['Reading ... ',fileName]);
@@ -21,7 +28,7 @@ Y = weaktrain{partNo}';
 Ytest = strongtest{partNo}';
 lbls = strongtrain{partNo}';
 
-
+%/~
 % find movies with too big rates
 %max_film = max(Y');
 %max_film_test = max(Ytest');
@@ -54,3 +61,4 @@ lbls = strongtrain{partNo}';
 %Ytest(toRemove,:) = [];
 %lbls(toRemove,:) = [];
         
+%~/

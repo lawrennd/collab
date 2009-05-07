@@ -12,6 +12,8 @@ function model = collabOptimise(model, Y, options)
 % SEEALSO : collabCreate
 %
 % COPYRIGHT : Neil D. Lawrence, 2008
+
+% COLLAB
   
   if iscell(Y)
     numUsers = size(Y, 1);

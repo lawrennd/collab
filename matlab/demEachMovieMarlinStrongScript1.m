@@ -1,16 +1,19 @@
 function [] = demEachMovieMarlinStrongScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
-% DEMEACHMOVIESMARLINSTRONGSCRIPT1 Try collaborative filtering on the Movielens data with
-% Marlins partitions
-% where the strong movielens experiment
+% DEMEACHMOVIESMARLINSTRONGSCRIPT1 EachMovie strong generalization.
+% FORMAT
+% DESC Try collaborative filtering with the RBF covariance function
+% on the EachMovie data with Marlin's partitions for strong generalization.
+% ARG  substract_mean : bool if substract the mean.
+% ARG partNo :  vector with the partitions to compute results.
+% ARG latentDim_v : vector with the latent dimensionalities to compute results.
+% ARG iters : number of iterations.
+% ARG inverted : if true, then learn users as examples and not items.
 %
-  % demEachMovieMarlinStrongScript1(substract_mean, partNo_v,
-  % latentDim_v,iters, inverted)
+% SEEALSO collabCreate, collabOptimise
 %
-% substract_mean --> bool if substract the mean
-% partNo_v --> vector with the partitions to compute results
-% latentDim_v --> vector with the latent dimensionalities to compute results
-% iters --> number of iterations
-% if inverted = true, then learn users as examples and not movies
+% COPYRIGHT : Raquel Urtasun, 2009
+
+% COLLAB
 
 randn('seed', 1e5);
 rand('seed', 1e5);

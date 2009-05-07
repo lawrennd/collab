@@ -1,6 +1,7 @@
-% DEMEACHMOVIE1 Try collaborative filtering on the EachMovie data with
-% Marlins partitions
+% DEMEACHMOVIE1 Try collaborative filtering on the EachMovie data with Marlin's partitions
 % where the weak movielens experiment
+
+% COLLAB
 
 randn('seed', 1e5);
 rand('seed', 1e5);

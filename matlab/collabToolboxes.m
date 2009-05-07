@@ -2,9 +2,9 @@
 
 importLatest('netlab');
 importLatest('ndlutil');
-importTool('mltools');
+importLatest('mltools');
 importLatest('optimi');
-importTool('datasets');
+importLatest('datasets');
 importLatest('kern');
 importLatest('ivm');
 importLatest('gplvm');

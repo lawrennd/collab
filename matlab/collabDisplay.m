@@ -9,6 +9,8 @@ function collabDisplay(model, spaceNum)
 % SEEALSO : modelDisplay
 %
 % COPYRIGHT : Neil D. Lawrence, 2008
+
+% COLLAB
   
   if nargin > 1
     spacing = repmat(32, 1, spaceNum);
@@ -29,3 +31,4 @@ function collabDisplay(model, spaceNum)
   fprintf('  Kernel:\n')
 
   kernDisplay(model.kern, spaceNum+2)
+end

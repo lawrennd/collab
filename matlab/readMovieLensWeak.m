@@ -1,9 +1,20 @@
-function [Y,lbls,Ytest,lblstest] = readMovieLensWeak(partNo)
-% [Y,lbls,Ytest,lblstest] = readMovieLensWeakpartNo)
+function [Y, lbls, Ytest] = readMovieLensWeak(partNo)
+
+% READMOVIELENSWEAK Read in the weak partitions for the Movielens.
+% FORMAT
+% DESC reads the MovieLens 1M Marlin weak partitions.
+% ARG partNo : the part of the 1M MovieLens data to read in. 
+% RETURN Y : the data.
+% RETURN lbls : addiitonal information.
+% RETURN Ytest : the test data.
+%
+% SEEALSO : collabLoadData, readMovieLensMarlinStrong
+%
+% COPYRIGHT : Raquel Urtasun, 2009
+
+% COLLAB
 
 
-lblstest = [];
-lbl = [];
 
 baseDir = datasetsDirectory;
 dirSep = filesep;
