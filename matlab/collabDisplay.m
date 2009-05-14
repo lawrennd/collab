@@ -11,7 +11,7 @@ function collabDisplay(model, spaceNum)
 % COPYRIGHT : Neil D. Lawrence, 2008
 
 % COLLAB
-  
+
   if nargin > 1
     spacing = repmat(32, 1, spaceNum);
   else
@@ -27,6 +27,16 @@ function collabDisplay(model, spaceNum)
   fprintf('  Input dimension: %d\n', model.q);
   fprintf(spacing);
   fprintf('  Number of processes: %d\n', model.d);
+  if model.heteroNoise
+    fprintf(spacing);
+    fprintf('  Heteroschodastic noise model, mean %2.4f, sd %2.4f\n', mean(model.diagvar), sqrt(var(model.diagvar)))  
+  end
+  if model.M > 1
+    fprintf(spacing);
+    fprintf('  Mixture model with %d components.\n', model.M)
+    fprintf(spacing);
+    fprintf('    Output variance %2.4f.\n', model.sigma2)
+  end
   fprintf(spacing);
   fprintf('  Kernel:\n')
 
