@@ -28,11 +28,9 @@ computePredictionsErrorWeak.m
 changeNameMovielens.m
 demEachMovieMarlinWeakTestCustom1.m
 ml-weak.m
-readMovieLensWeak.m
 splitProbeData.m
 extractMovielens1Mprobe.m
 demMovielens7.m
-readMovieLens.m
 PlotResultsMovielensMarlinWeak.m
 em-weak.m
 netflixTest.m
@@ -42,6 +40,8 @@ loadNetflix.m
 demMovielens6.m
 demMovielens6Script.m
 demNetflix4.m
+readMovieLens10MCell.m
+readMovieLens10M.m
 collabCreateTensor.m
 demMovielens3Script.m
 loadAverageVariance.m
@@ -57,7 +57,11 @@ ml-weak.m
 splitProbeData.m
 extractMovielens1Mprobe.m
 computeTestErrorEnsemblesWeak.m
+computeTestErrorStrong.m
+loadSparse10M.m
 demMovielens7.m
 restartNetflix5.m
 PlotResultsMovielensMarlinWeak.m
 PlotResultsEachMovieMarlinCompareKernels.m
+readMovieLensWeak.m
+readMovieLens.m
