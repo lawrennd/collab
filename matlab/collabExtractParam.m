@@ -18,7 +18,7 @@ function [params, names] = collabExtractParam(model)
 %
 % COPYRIGHT : Neil D. Lawrence, 2009
 
-% GP
+% COLLAB
 
 if nargout > 1
   returnNames = true;

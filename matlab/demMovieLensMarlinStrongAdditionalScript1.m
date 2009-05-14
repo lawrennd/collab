@@ -86,12 +86,12 @@ for i_latent=1:length(latentDim_v)
     options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 1, [1:q-1]);
     options.kern.comp{1} = kernSetIndex(options.kern.comp{1}, 2, [q]);
     options.kern.comp{1}.comp{2}.additional = lblstest; % we store additional info in lblstest
-    model = collabCreateTensor(q, size(Y, 2), size(Y, 1), options);
+    model = collabCreateTensor(q, size(Y, 2), Y, options);
     % put the last component to be the index
     
     
     %options = collabOptions;
-    %model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+    %model = collabCreate(q, size(Y, 2), Y, options);
     
     
     

@@ -12,7 +12,7 @@ dataSetName = 'movielens';
 
 q = 3;
 options = collabOptions;
-model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+model = collabCreate(q, size(Y, 2), Y, options);
 model.kern.comp{2}.variance = 0.11;
 model.kern.comp{3}.variance =  1; 
 model.selectionCriterion = 'random';

@@ -1,3 +1,4 @@
+collabLogLikeGradients2.m
 RecomputeMovieLens10MWeakScript1.m
 RecomputeMovieLens10MWeakPartialScript1.m
 kernAdditionalKernCompute.m

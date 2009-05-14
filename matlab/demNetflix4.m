@@ -13,7 +13,7 @@ load /local/data/netFlixDataProbe.mat
 q = 5;
 options = collabOptions;
 options.kern = {'rbf', 'lin', 'bias', 'white'};
-model = collabCreate(q, size(Y, 1), 17770, options);
+model = collabCreate(q, size(Y, 1), Y, options);
 model.mu = ratingSum./ratingCount;
 model.sd = sqrt(ratingSquareSum./ratingCount - model.mu.*model.mu);
 model.kern.comp{3}.variance = 0.11;

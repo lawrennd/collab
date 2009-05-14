@@ -44,7 +44,7 @@ for i_latent=1:length(latentDim_v)
         end;
 
         options = collabOptions;
-        model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+        model = collabCreate(q, size(Y, 2), Y, options);
         % keyboard;
         if (substract_mean)
 	    model.mu = repmat(meanY,size(model.mu,1),1);

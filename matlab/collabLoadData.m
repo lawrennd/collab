@@ -33,6 +33,31 @@ function [Y, lbls, Ytest, lblstest] = collabLoadData(dataset, seedVal)
   lbls = [];
   lblstest = [];
   switch dataset
+   
+       case 'mixtoydata'
+    numItems = 200;
+    numUsers = 200;
+    X = randn(numItems, 2);
+    kern = kernCreate(X, {'rbf', 'bias', 'white'});
+    kern.comp{1}.variance = 1;
+    kern.comp{2}.variance = 0.4;
+    kern.comp{3}.variance = 0.4;
+    K = kernCompute(kern, X);
+    Y0 = gsamp(zeros(numItems, 1), K, numUsers)';
+    Y1 = gsamp(zeros(numItems, 1), K, numUsers)';
+    lbls = rand(numItems, numUsers)>0.5;
+    observed = rand(numItems, numUsers)>0.8;
+    Yfull = zeros(numItems, numUsers);
+    Yfull(find(lbls)) = Y0(find(lbls));
+    Yfull(find(~lbls)) = Y1(find(~lbls));
+    Y = zeros(numItems, numUsers);
+    Ytest = zeros(numItems, numUsers);
+    Y(find(observed)) = Yfull(find(observed));
+    Ytest(find(~observed)) = Yfull(find(~observed));
+    Y = sparse(Y);
+    Ytest = sparse(Ytest);
+    lblstest = X;
+
    case 'movielens'
     try 
       load([baseDir 'movielens.mat']);

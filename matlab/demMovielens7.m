@@ -35,7 +35,7 @@ end
 
 q = 5;
 options = collabOptions;
-model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+model = collabCreate(q, size(Y, 2), Y, options);
 model.kern.comp{2}.variance = 0.11;
 model.kern.comp{3}.variance =  5; 
 options = collabOptimiseOptions;

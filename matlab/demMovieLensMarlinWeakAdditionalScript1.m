@@ -88,13 +88,13 @@ for i_latent=1:length(latentDim_v)
     
     %keyboard;
     options.kern.comp{1}.comp{2}.additional = lbls;
-    model = collabCreateTensor(q, size(Y, 2), size(Y, 1), options);
+    model = collabCreateTensor(q, size(Y, 2), Y, options);
     % put the last component to be the index
     
     %keyboard;
     
     %options = collabOptions;
-    %model = collabCreate(q, size(Y, 2), size(Y, 1), options);
+    %model = collabCreate(q, size(Y, 2), Y, options);
     
     if (substract_mean)
       if 0
