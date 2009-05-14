@@ -1,6 +1,6 @@
 function [Y, lbls, Ytest] = readMovieLensMarlinStrong(partNo)
 
-% READEACHMOVIEMARLINSTRONG Read in Marlin's strong partitions for movielens 1M.
+% READMOVIELENSMARLINSTRONG Read in Marlin's strong partitions for movielens 1M.
 % FORMAT
 % DESC reads the Movielens 1M Marlin strong partitions.
 % ARG partNo : the part of the Movielens data to read in. 

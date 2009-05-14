@@ -1,5 +1,5 @@
 function [] = demEachMovieMarlinStrongLinearScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
-% DEMEACHMOVIESMARLINSTRONGLINEARSCRIPT1 EachMovie strong generalization with linear covariance.
+% DEMEACHMOVIEMARLINSTRONGLINEARSCRIPT1 EachMovie strong generalization with linear covariance.
 % FORMAT
 % DESC Try collaborative filtering with the Linear covariance function
 % on the EachMovie data with Marlin's partitions for strong generalization.

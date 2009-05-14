@@ -1,5 +1,5 @@
 function [] = demEachMovieMarlinStrongScript1(substract_mean, partNo_v, latentDim_v,iters, inverted)
-% DEMEACHMOVIESMARLINSTRONGSCRIPT1 EachMovie strong generalization.
+% DEMEACHMOVIEMARLINSTRONGSCRIPT1 EachMovie strong generalization.
 % FORMAT
 % DESC Try collaborative filtering with the RBF covariance function
 % on the EachMovie data with Marlin's partitions for strong generalization.

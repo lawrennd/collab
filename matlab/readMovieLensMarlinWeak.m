@@ -1,6 +1,6 @@
 function [Y, Ytest] = readMovieLensMarlinWeak(partNo)
 
-% READEACHMOVIEMARLINWEAK Read in Marlin's weak partitions for movielens 1M.
+% READMOVIELENSMARLINWEAK Read in Marlin's weak partitions for movielens 1M.
 % FORMAT
 % DESC reads the Movielens 1M Marlin weak partitions.
 % ARG partNo : the part of the Movielens data to read in. 

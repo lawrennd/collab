@@ -1,5 +1,6 @@
 function [Y, lbls, Ytest] = readEachMovieMarlinStrong(partNo)
 
+% READEACHMOVIEMARLINSTRONG Reads the EachMovie strong partitions from Marlin.
 % FORMAT
 % DESC reads the EachMovie Marlin strong partitions.
 % ARG partLetter : the part of the 10M MovieLens data to read in. 
