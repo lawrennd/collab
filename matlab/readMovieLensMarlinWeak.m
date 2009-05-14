@@ -20,7 +20,7 @@ dirSep = filesep;
 % load the ratings
 
 
-fileName = [baseDir dirSep 'jason_rennie' dirSep 'project' dirSep '1mml-mmmf' dirSep 'data' dirSep 'marlin.mat'];
+fileName = [baseDir dirSep 'collab' dirSep 'project' dirSep '1mml-mmmf' dirSep 'data' dirSep 'marlin.mat'];
 
 disp(['Reading ... ',fileName]);
 

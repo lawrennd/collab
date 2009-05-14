@@ -19,7 +19,7 @@ function [Y, Ytest] = readEachMovieMarlinWeak(partNo)
   % load the ratings
   
   
-  fileName = [baseDir dirSep 'jason_rennie' dirSep 'project' dirSep 'em-mmmf' dirSep 'data' dirSep 'marlin.mat'];
+  fileName = [baseDir dirSep 'collab' dirSep 'project' dirSep 'em-mmmf' dirSep 'data' dirSep 'marlin.mat'];
   
   disp(['Reading ... ',fileName]);
   
