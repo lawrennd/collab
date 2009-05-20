@@ -6,10 +6,10 @@ function model = collabOptimise(model, Y, options)
 % descent.
 % ARG model : the model to optimize.
 % ARG Y : the ratings in a numFilms x numUsers sparse matrix.
-% ARG options : options for the optimization.
+% ARG options : options for the optimization (see collabOptimiseOptions).
 % RETURN model : the optimized model.
 %
-% SEEALSO : collabCreate
+% SEEALSO : collabCreate, collabOptimiseOptions
 %
 % COPYRIGHT : Neil D. Lawrence, 2008
 

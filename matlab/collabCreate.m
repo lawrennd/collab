@@ -5,6 +5,7 @@ function model = collabCreate(q, d, y, options);
 % DESC creates a collaborative filter structure with a latent space of q.
 % ARG q : input data dimension.
 % ARG d : the number of processes (i.e. output data dimension).
+% ARG Y : the data.
 % ARG options : options structure as defined by collabOptions.m.
 % RETURN model : model structure containing the GP collaborative filter.
 %
