@@ -8,7 +8,7 @@ sys.path.append(os.path.join(posix.environ['HOME'], 'mlprojects', 'collab', 'pyt
 sys.path.append(os.path.join(posix.environ['HOME'], 'mlprojects', 'swig', 'src'))
 import pyflix.datasets
 import numpy as np
-import ndlml as nl
+import ndlml
 import math
 import netlab
 import optimi
@@ -17,7 +17,7 @@ from ndlutil import *
 def dataDir(dataSetName):
     baseName = os.path.join('/local', 'data', 'datasets')
     if dataSetName == 'netflix':
-        return os.path.join(baseName, 'netflix', 'pyflix64')
+        return os.path.join(baseName, 'netflix', 'pyflix')
     elif dataSetName == 'movielens100k1':
         return os.path.join(baseName, 'movielens100k', 'pyflix1')
     elif dataSetName == 'movielens100k2':
@@ -97,7 +97,7 @@ class options:
     runSparse = True
     numActive = 100
     maxFTC = 500
-    sparseApprox = nl.gp.DTCVAR
+    sparseApprox = ndlml.gp.DTCVAR
 
     seed = 10000
 
@@ -107,9 +107,9 @@ class options:
     # How often to save status 
     saveEvery= 20000
     numIters = 10
-    resultsBaseDir = ''
+    resultsBaseDir = None
     def __init__(self, dataSetName = 'netflix'):
-        resultsBaseDir = resultsDir(dataSetName)
+        self.resultsBaseDir = resultsDir(dataSetName)
 
 class ppca(optimi.optimisable):
     """A pppca style model for collaborative filtering, takes advantage of the sparse structure of the data, """
@@ -739,38 +739,38 @@ def extractKernType(latentDim, lnsigma2, options):
     """Extract the kernel types from the options and return as a tuple"""
     o = options
 
-    fullKern = nl.cmpndKern(latentDim) 
-    sparseKern = nl.cmpndKern(latentDim) 
+    fullKern = ndlml.cmpndKern(latentDim) 
+    sparseKern = ndlml.cmpndKern(latentDim) 
     
     kt = type(o.baseKern)
     if kt==str:
         if o.baseKern == 'rbf':
-            kern1 = nl.rbfKern(latentDim)
+            kern1 = ndlml.rbfKern(latentDim)
         elif o.baseKern == 'mlp':
-            kern1 = nl.mlpKern(latentDim)
+            kern1 = ndlml.mlpKern(latentDim)
         elif o.baseKern == 'ratquad':
-            kern1 = nl.ratquadKern(latentDim)
+            kern1 = ndlml.ratquadKern(latentDim)
         elif o.baseKern == 'matern32':
-            kern1 = nl.matern32Kern(latentDim)
+            kern1 = ndlml.matern32Kern(latentDim)
         elif o.baseKern == 'matern52':
-            kern1 = nl.matern52Kern(latentDim)
+            kern1 = ndlml.matern52Kern(latentDim)
         elif o.baseKern == 'lin':
-            kern1 = nl.linKern(latentDim)
+            kern1 = ndlml.linKern(latentDim)
 
-    elif kt==nl.rbfkern \
-            or kt==nl.mlpKern \
-            or kt==nl.ratquadKern \
-            or kt==nl.matern32Kern \
-            or kt==nl.matern52Kern \
-            or kt==nl.linKern \
-            or kt==nl.polyKern \
-            or kt==nl.cmpndKern:
+    elif kt==ndlml.rbfkern \
+            or kt==ndlml.mlpKern \
+            or kt==ndlml.ratquadKern \
+            or kt==ndlml.matern32Kern \
+            or kt==ndlml.matern52Kern \
+            or kt==ndlml.linKern \
+            or kt==ndlml.polyKern \
+            or kt==ndlml.cmpndKern:
         # Kernel has been provided as a class already.
         kern1 = o.baseKern
     
-    kern2 = nl.biasKern(latentDim)
-    kern3 = nl.whiteKern(latentDim)
-    kern4 = nl.whitefixedKern(latentDim)
+    kern2 = ndlml.biasKern(latentDim)
+    kern3 = ndlml.whiteKern(latentDim)
+    kern4 = ndlml.whitefixedKern(latentDim)
 
     kern2.setVariance(0.11)
     kern3.setVariance(math.exp(lnsigma2))
@@ -809,18 +809,18 @@ def loadResults(loadDir, latentDim, options):
 
     # Set log sigma2 (variance for FTC) and log beta (precision for sparse)
     # using this dummy y forces mean of Gaussian noise to be zero.
-    dummyy = nl.matrix(10, 1)
+    dummyy = ndlml.matrix(10, 1)
     dummyy.zeros()
 
     # paramIter.fromarray(param)
-    paramIter = nl.matrix(param.shape[0], param.shape[1])
+    paramIter = ndlml.matrix(param.shape[0], param.shape[1])
     param[0, -1] = lnsigma2
 #    paramIter.fromarray(param)
     for i in range(param.shape[1]):
         paramIter.setVal(param[0, i], i)
     fullKern.setTransParams(paramIter)
 
-    paramIter = nl.matrix(param.shape[0], param.shape[1]-1)
+    paramIter = ndlml.matrix(param.shape[0], param.shape[1]-1)
     param2 = param[0, 0:-1]
 #    paramIter.fromarray(param2)
     for i in range(param.shape[1]-1):
@@ -835,7 +835,7 @@ def loadResults(loadDir, latentDim, options):
                sparseKern = sparseKern,
                lnsigma2 = lnsigma2, 
                lnbeta = lnbeta, 
-               noise =  nl.gaussianNoise(dummyy))
+               noise =  ndlml.gaussianNoise(dummyy))
 
 
 
@@ -1062,7 +1062,7 @@ def run(latentDim, dataSetName, experimentNo, options):
 
     # Set log sigma2 (variance for FTC) and log beta (precision for sparse)
     # using this dummy y forces mean of Gaussian noise to be zero.
-    dummyy = nl.matrix(10, 1)
+    dummyy = ndlml.matrix(10, 1)
     dummyy.zeros()
 
     (fullKern, sparseKern) = extractKernType(latentDim, math.log(o.startVariance), o)
@@ -1074,11 +1074,11 @@ def run(latentDim, dataSetName, experimentNo, options):
                sparseKern = sparseKern,
                lnsigma2 = math.log(o.startVariance), 
                lnbeta = -math.log(o.startVariance), 
-               noise =  nl.gaussianNoise(dummyy))
+               noise =  ndlml.gaussianNoise(dummyy))
 
 
     # Set up parameter vectors
-    paramNd = nl.matrix(1, p.fullKern.getNumParams())
+    paramNd = ndlml.matrix(1, p.fullKern.getNumParams())
     p.fullKern.getTransParams(paramNd)
     p.param = paramNd.toarray()
 
@@ -1181,7 +1181,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
         if len(filmRatings)>o.maxFTC:
             if not o.runSparse:
                 continue
-            if o.sparseApprox==nl.gp.FTC:
+            if o.sparseApprox==ndlml.gp.FTC:
                 sparseFTC = True # just do FTC multiple times.
             else:
                 sparseApprox = True  # do a real sparse approximation.
@@ -1206,8 +1206,8 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
                                 dataSet = d,
                                 parameters = p)
 
-                model = nl.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, nl.gp.FTC, 0, 3)
-                paramIter = nl.matrix(p.param.shape[0], p.param.shape[1])
+                model = ndlml.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, ndlml.gp.FTC, 0, 3)
+                paramIter = ndlml.matrix(p.param.shape[0], p.param.shape[1])
                 for i in range(p.param.shape[1]):
                     paramIter.setVal(p.param[0, i], 0, i)
                 model.setOptParams(paramIter)
@@ -1241,7 +1241,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
                                            parameters = p)
                 
 
-        paramIter = nl.matrix()
+        paramIter = ndlml.matrix()
 
 
 
@@ -1252,7 +1252,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
                 
 
             # Set up GPLVM with sparse approximation.
-            model = nl.gp(latentDim, 1, Xiter, yiter, p.sparseKern, p.noise, o.sparseApprox, o.numActive, 3)
+            model = ndlml.gp(latentDim, 1, Xiter, yiter, p.sparseKern, p.noise, o.sparseApprox, o.numActive, 3)
             paramIter.resize(1, o.numActive*latentDim+p.fullKern.getNumParams())
 
             # Set the inducing point locations.
@@ -1276,8 +1276,8 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
             pc.param[0, -1] = pc.lnsigma2 
             p.param[0, -1] = p.lnsigma2 
 
-            model = nl.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, nl.gp.FTC, 0, 3)
-            paramIter = nl.matrix(p.param.shape[0], p.param.shape[1])
+            model = ndlml.gp(latentDim, 1, Xiter, yiter, p.fullKern, p.noise, ndlml.gp.FTC, 0, 3)
+            paramIter = ndlml.matrix(p.param.shape[0], p.param.shape[1])
             for i in range(p.param.shape[1]):
                 paramIter.setVal(p.param[0, i], 0, i)
             model.setOptParams(paramIter)
@@ -1339,7 +1339,7 @@ def runIter(dataSet, params, paramChange, options, iterInfo, iterDir):
 def updateParam(filmIndices, model, p, pc, sparseApprox, learnRate, o):
 
     latentDim = p.X.shape[1]
-    giter = nl.matrix(1, model.getOptNumParams())
+    giter = ndlml.matrix(1, model.getOptNumParams())
     model.computeObjectiveGradParams(giter)
     pdb.set_trace()
     #g = np.zeros((giter.getRows(), giter.getCols()))
@@ -1404,7 +1404,7 @@ def predVal(user, testFilmId, parameters, dataSet):
         filmRatings = filmRatings[perm[0:useForPred]].flatten()
         filmIndices = filmIndices[perm[0:useForPred]].flatten()
 
-    xstar = nl.matrix(1, latentDim)
+    xstar = ndlml.matrix(1, latentDim)
     for i in range(latentDim):
         xstar.setVal(parameters.X[testFilmId, i], i)
     
@@ -1412,9 +1412,9 @@ def predVal(user, testFilmId, parameters, dataSet):
                                filmIndices=filmIndices, \
                                dataSet=dataSet, \
                                parameters=parameters)
-    K = nl.matrix(X.getRows(), X.getRows())
-    kstar = nl.matrix(X.getRows(), 1)
-    pred = nl.matrix(X.getRows(), 1)
+    K = ndlml.matrix(X.getRows(), X.getRows())
+    kstar = ndlml.matrix(X.getRows(), 1)
+    pred = ndlml.matrix(X.getRows(), 1)
 
     parameters.fullKern.compute(K, X);
     parameters.fullKern.compute(kstar, X, xstar);
@@ -1445,10 +1445,10 @@ def convertNlMatrix(filmRatings, filmIndices, dataSet, parameters):
                               dataSet=dataSet)
     
     # Xiter, yiter, paramIter are the things to be passed to the
-    # nl.gp model for finding the gradient. They must be in the
-    # form of nl.matrix().
-    Xiter = nl.matrix(len(filmIndices), latentDim)
-    yiter = nl.matrix(len(filmIndices), 1)
+    # ndlml.gp model for finding the gradient. They must be in the
+    # form of ndlml.matrix().
+    Xiter = ndlml.matrix(len(filmIndices), latentDim)
+    yiter = ndlml.matrix(len(filmIndices), 1)
     count3 = 0
     for i in filmIndices:
         yiter.setVal(y[count3, 0], count3, 0)
