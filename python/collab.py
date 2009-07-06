@@ -1,17 +1,21 @@
-
-import pdb
+##SETUP
 import os
 import sys
-import time
 import posix
 sys.path.append(os.path.join(posix.environ['HOME'], 'mlprojects', 'collab', 'python'))
+sys.path.append(os.path.join(posix.environ['HOME'], 'mlprojects', 'mltools', 'python'))
 sys.path.append(os.path.join(posix.environ['HOME'], 'mlprojects', 'swig', 'src'))
+##ENDSETUP
+
+import pdb
+import time
 import pyflix.datasets
 import numpy as np
 import ndlml
 import math
 import netlab
 import optimi
+import mltools
 from ndlutil import *
 
 def dataDir(dataSetName):
@@ -111,13 +115,14 @@ class options:
     def __init__(self, dataSetName = 'netflix'):
         self.resultsBaseDir = resultsDir(dataSetName)
 
-class ppca(optimi.optimisable):
+class ppca(mltools.probabilisticmodel):
     """A pppca style model for collaborative filtering, takes advantage of the sparse structure of the data, """
     linVariance = 1.0
     biasVariance = 0.11
     whiteVariance = 5.0
     def __init__(self, latentDim, numData, 
                  linVariance=1.0, biasVariance=0.11, whiteVariance=5.0, heteroNoise=False):
+        mltools.probabilisticmodel.__init__(self)
         self.X = np.random.normal(0.0, 1e-6, (numData, latentDim))
         self.latentDim = latentDim
         self.numData = numData
@@ -137,37 +142,37 @@ class ppca(optimi.optimisable):
         else:
             return "PPCA model, Lin var " + str(self.linVariance) + ", Bias var " + str(self.biasVariance) + ", noise var " + str(self.whiteVariance)
 
-    def getParam(self):
+    def extractParam(self):
         """Get the parameters of the PPCA model."""
         if self.heteroNoise:
-            return np.concatenate((np.asmatrix(self.X[self.indices, :].flatten(1)), 
-                                   np.asmatrix(self.linVariance), 
-                                   np.asmatrix(self.biasVariance), 
-                                   np.asmatrix(self.d[self.indices, :].flatten(1))), 1)
+            return np.concatenate((np.asarray(self.X[self.indices]).flatten(),
+                                  np.asarray([self.linVariance]), 
+                                  np.asarray([self.biasVariance]), 
+                                  np.asarray(self.d[self.indices, :]).flatten()))
         else:
-            return np.concatenate((np.asmatrix(self.X[self.indices, :].flatten(1)), 
-                                   np.asmatrix(self.linVariance), 
-                                   np.asmatrix(self.biasVariance), 
-                                   np.asmatrix(self.whiteVariance)), 1)
+            return np.concatenate((np.asarray(self.X[self.indices]).flatten(), 
+                                   np.asarray([self.linVariance]), 
+                                   np.asarray([self.biasVariance]), 
+                                   np.asarray([self.whiteVariance])))
                               
-    def setParam(self, parameters):
+    def expandParam(self, parameters):
         """Set the parameters of the PPCA model using a vector of the parameters."""
         N = len(self.indices)
         start = 0
         end = self.latentDim*N
-        self.X[self.indices, :] = parameters[0, start:end].reshape(N,self.latentDim,order='F').copy()
+        self.X[self.indices, :] = parameters[start:end].reshape(N,self.latentDim).copy()
         start = end
         end = end + 1
-        self.linVariance = float(parameters[0, start])
+        self.linVariance = float(parameters[start])
         start = end
         end = end + 1
-        self.biasVariance = float(parameters[0, start])
+        self.biasVariance = float(parameters[start])
         start = end
         end = end + N
         if self.heteroNoise:
-            self.d[self.indices, :] = parameters[0, start:end].reshape(N, 1, order='F').copy()
+            self.d[self.indices, :] = parameters[start:end].reshape(N, 1).copy()
         else:
-            self.whiteVariance = float(parameters[0,start])
+            self.whiteVariance = float(parameters[start])
         
 
     def logLikelihood(self):
@@ -341,7 +346,7 @@ class ppca(optimi.optimisable):
                 logdetC = logdetC + np.log(self.d[self.indices, :]).sum()
         return Cinv, logdetC
 
-    def logLikeGradient(self):
+    def logLikeGradient(self, ):
         """Computes the gradient of the log likelihood with respect to
         the parameters."""
         s_w = self.linVariance
@@ -383,25 +388,30 @@ class ppca(optimi.optimisable):
         else:
             return gX, float(gsigma_w), float(gsigma_b), float(gsigma_n)
 
-    def gradients(self):
+    def gradients(self, params=None):
         """Gradients of the objective function with respect to the
         parameters of the model. Here it simply returns the negative
         of the log likelihood gradient."""
+
+        if params is not None:
+            self.expandParam(params)
         gX, gsigma_w, gsigma_b, gsigma_n = self.logLikeGradient()
         if self.heteroNoise:
-            return np.concatenate((-gX.flatten(1), 
-                                    np.asmatrix(-gsigma_w), 
-                                    np.asmatrix(-gsigma_b), 
-                                    np.asmatrix(-gsigma_n.flatten(1))), 1)
+            return np.concatenate((-np.asarray(gX).flatten(), 
+                                    np.asarray([-gsigma_w]), 
+                                    np.asarray([-gsigma_b]), 
+                                    -np.asarray(gsigma_n).flatten()))
         else:
-            return np.concatenate((-gX.flatten(1), 
-                                    np.asmatrix(-gsigma_w), 
-                                    np.asmatrix(-gsigma_b), 
-                                    np.asmatrix(-gsigma_n)), 1)
+            return np.concatenate((-np.asarray(gX).flatten(), 
+                                    np.asarray([-gsigma_w]), 
+                                    np.asarray([-gsigma_b]), 
+                                    np.asarray([-gsigma_n])))
 
-    def objective(self):
+    def objective(self, params=None):
         """Return the objective function for the model --- here it is
         simply the negative log likelihood."""
+        if params is not None:
+            self.expandParam(params)
         return -self.logLikelihood()
 
 def restartPpca(loadIter, startCount, loadUser, latentDim, dataSetName, experimentNo, options):
