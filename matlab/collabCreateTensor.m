@@ -19,7 +19,11 @@ model.type = 'collab';
 
 model.q = q;
 model.d = d;
-model.N = size(Y, 1);
+if size(Y, 1) == 1 && size(Y, 2) == 1
+  model.N = Y;
+else
+  model.N = size(Y, 1);
+end
 %keyboard;
 model.kern = kernCreate(q, options.kern);
 %initParams = collabExtractParam(model);
